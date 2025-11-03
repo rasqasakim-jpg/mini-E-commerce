@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import ProfilCard from './src/components/Profile';
-import LoginForm from './src/components/LoginForm';
-import HeroSection from './src/components/HeroSection';
+import SimpleList from './src/components/SimpleList';
+import SectionListExample from './src/components/SectionListExample';
+import FlatListExample from './src/components/FlatListExample';
 
 const App = () => {
-  const [count, setCount] = useState(0);
   return (
-    // <ProfilCard/>
-    // <LoginForm />
-    <HeroSection />
+    <SimpleList />
+    // <SectionListExample/>
+    // <FlatListExample/>
+
   );
 };
 
