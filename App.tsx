@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import SimpleList from './src/components/SimpleList';
-import SectionListExample from './src/components/SectionListExample';
-import FlatListExample from './src/components/FlatListExample';
+import React from 'react';
+import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import GestureDemoScreen from './src/screens/GestureDemoScreen';
 
-const App = () => {
+export default function App() {
   return (
-    <SimpleList />
-    // <SectionListExample/>
-    // <FlatListExample/>
-
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#007AFF" />
+      <GestureDemoScreen />
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  text: { fontSize: 20, marginBottom: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F4F6FA',
+  },
 });
-
-export default App;
