@@ -36,5 +36,4 @@ export const useTheme = (): ThemeContextType => {
   return context;
 };
 
-// Export type untuk digunakan di file lain
 export type { Theme, ThemeContextType };
