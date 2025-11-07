@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   Image,
   StyleSheet,
   Dimensions,
+  useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { Product } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
@@ -13,27 +15,60 @@ interface ProductCardProps {
   product: Product;
 }
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 40) / 2;
-
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { theme } = useTheme();
+  const { width } = useWindowDimensions();
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
+  // Responsive card width calculation
+  const CARD_WIDTH = (width - 48) / 2; // 16px padding + 8px margin
 
   return (
-    <View style={[styles.card, theme === 'dark' && styles.cardDark]}>
-      <Image
-        source={{ uri: product.imageUrl }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+    <View style={[
+      styles.card, 
+      theme === 'dark' && styles.cardDark,
+      { width: CARD_WIDTH }
+    ]}>
+      <View style={styles.imageContainer}>
+        {imageLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={theme === 'dark' ? '#63B3ED' : '#007AFF'} />
+          </View>
+        )}
+        <Image
+          source={{ 
+            uri: imageError 
+              ? 'https://via.placeholder.com/150/EDF2F7/2D3748?text=No+Image' 
+              : product.imageUrl 
+          }}
+          style={styles.image}
+          resizeMode="cover"
+          onLoadStart={() => setImageLoading(true)}
+          onLoadEnd={() => setImageLoading(false)}
+          onError={() => {
+            setImageError(true);
+            setImageLoading(false);
+          }}
+        />
+      </View>
+      
       <View style={styles.content}>
-        <Text style={[styles.name, theme === 'dark' && styles.nameDark]} numberOfLines={2}>
+        <Text 
+          style={[styles.name, theme === 'dark' && styles.nameDark]} 
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
           {product.name}
         </Text>
         <Text style={[styles.price, theme === 'dark' && styles.priceDark]}>
           Rp {product.price.toLocaleString('id-ID')}
         </Text>
-        <Text style={[styles.description, theme === 'dark' && styles.descriptionDark]} numberOfLines={2}>
+        <Text 
+          style={[styles.description, theme === 'dark' && styles.descriptionDark]} 
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
           {product.description}
         </Text>
       </View>
@@ -43,10 +78,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: CARD_WIDTH,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    margin: 5,
+    borderRadius: 12,
+    margin: 4,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -55,30 +89,49 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+    flex: 1,
+    minHeight: 200,
   },
   cardDark: {
-    backgroundColor: '#2D3748', // Warna latar belakang gelap
-    shadowColor: '#000', // Bayangan bisa tetap hitam tapi mungkin kurang terlihat
-    borderColor: '#4A5568', // Tambahkan border untuk memisahkan kartu
+    backgroundColor: '#2D3748',
+    borderColor: '#4A5568',
     borderWidth: 1,
+  },
+  imageContainer: {
+    position: 'relative',
   },
   image: {
     width: '100%',
     height: 120,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F7FAFC',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
   content: {
-    padding: 10,
+    padding: 12,
+    flex: 1,
+    justifyContent: 'space-between',
   },
   name: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginBottom: 4,
-    color: '#333',
+    color: '#2D3748',
+    lineHeight: 18,
   },
   nameDark: {
-    color: '#F7FAFC', // Warna teks terang
+    color: '#F7FAFC',
   },
   price: {
     fontSize: 16,
@@ -87,14 +140,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   priceDark: {
-    color: '#63B3ED', // Warna aksen biru terang
+    color: '#63B3ED',
   },
   description: {
     fontSize: 12,
-    color: '#666',
+    color: '#718096',
+    lineHeight: 16,
   },
   descriptionDark: {
-    color: '#A0AEC0', // Warna teks abu-abu terang
+    color: '#A0AEC0',
   },
 });
 

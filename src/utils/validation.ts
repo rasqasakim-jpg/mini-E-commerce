@@ -5,12 +5,16 @@ export const validateForm = (formData: ProductFormData): ValidationErrors => {
 
   if (!formData.name.trim()) {
     errors.name = 'Nama produk wajib diisi';
+  } else if (formData.name.trim().length < 3) {
+    errors.name = 'Nama produk minimal 3 karakter';
   }
 
   if (!formData.price.trim()) {
     errors.price = 'Harga wajib diisi';
   } else if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
     errors.price = 'Harga harus berupa angka positif';
+  } else if (Number(formData.price) < 1000) {
+    errors.price = 'Harga minimal Rp 1.000';
   }
 
   if (!formData.imageUrl.trim()) {
@@ -31,7 +35,6 @@ const isValidUrl = (url: string): boolean => {
   }
 };
 
-// Tambahkan function ini
 export const isValidatableField = (field: string): field is ValidatableFields => {
   return ['name', 'price', 'imageUrl'].includes(field);
 };
