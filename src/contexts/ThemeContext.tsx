@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Theme, ThemeContextType } from '../types';
+
+// Definisikan tipe di sini jika belum ada di types
+type Theme = 'light' | 'dark';
+
+interface ThemeContextType {
+  theme: Theme;
+  toggleTheme: () => void;
+}
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -28,3 +35,5 @@ export const useTheme = (): ThemeContextType => {
   }
   return context;
 };
+
+export type { Theme, ThemeContextType };

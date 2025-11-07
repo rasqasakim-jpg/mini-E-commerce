@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Product } from './src/types';
 import ProductList from './src/components/ProductList';
 import AddProductModal from './src/components/AddProductModal';
-import { ThemeProvider } from './src/contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './src/contexts/ThemeContext';
 
 // Initial sample products dengan URL gambar dari kamu
 const initialProducts: Product[] = [
@@ -79,9 +80,11 @@ const initialProducts: Product[] = [
   }
 ];
 
+// Komponen utama dengan theme access
 const AppContent: React.FC = () => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [modalVisible, setModalVisible] = useState(false);
+  const { theme } = useTheme(); // Menggunakan hook useTheme
 
   const handleAddProduct = (newProductData: Omit<Product, 'id'>) => {
     const newProduct: Product = {
@@ -92,7 +95,10 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[
+      styles.container, 
+      theme === 'dark' && styles.containerDark // Sekarang containerDark sudah ada
+    ]}>
       <ProductList
         products={products}
         onAddProductPress={() => setModalVisible(true)}
@@ -107,6 +113,7 @@ const AppContent: React.FC = () => {
   );
 };
 
+// Komponen App utama dengan ThemeProvider
 export default function App() {
   return (
     <ThemeProvider>
@@ -118,6 +125,9 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F7FAFC', // Light mode background
+  },
+  containerDark: {
+    backgroundColor: '#1A202C', // Dark mode background
   },
 });

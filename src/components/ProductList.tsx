@@ -5,6 +5,8 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
+  StatusBar,
 } from 'react-native';
 import { Product } from '../types';
 import ProductCard from './ProductCard';
@@ -20,6 +22,11 @@ const ProductList: React.FC<ProductListProps> = ({
   onAddProductPress,
 }) => {
   const { theme, toggleTheme } = useTheme();
+  const { width, height } = useWindowDimensions();
+  
+  // Responsive layout based on screen size
+  const isLandscape = width > height;
+  const numColumns = isLandscape ? 3 : 2;
 
   const renderProduct = ({ item }: { item: Product }) => (
     <ProductCard product={item} />
@@ -27,6 +34,11 @@ const ProductList: React.FC<ProductListProps> = ({
 
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
+      <StatusBar 
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#2D3748' : '#fff'}
+      />
+      
       <View style={[styles.header, theme === 'dark' && styles.headerDark]}>
         <Text style={[styles.title, theme === 'dark' && styles.titleDark]}>
           Mini E-Commerce
@@ -62,9 +74,10 @@ const ProductList: React.FC<ProductListProps> = ({
           data={products}
           renderItem={renderProduct}
           keyExtractor={(item) => item.id}
-          numColumns={2}
+          numColumns={numColumns}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          key={numColumns} // Re-render when columns change
         />
       )}
     </View>
@@ -83,7 +96,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 8, // Additional top padding for status bar
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
@@ -136,6 +151,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 8,
+    paddingBottom: 20, // Extra padding at bottom
   },
   emptyState: {
     flex: 1,
