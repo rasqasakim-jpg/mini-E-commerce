@@ -8,6 +8,7 @@ import Onboarding1 from '../screens/onboarding/Onboarding1';
 import Onboarding2 from '../screens/onboarding/Onboarding2';
 import ProductCatalogScreen from '../screens/catalog/ProductCatalogScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import DrawerNavigator from './DrawerNavigator';
 
 export type RootStackParamList = {
   Onboarding1: undefined;
@@ -74,7 +75,7 @@ const AppNavigator: React.FC = () => {
       >
         <Stack.Screen name="Onboarding1" component={Onboarding1} />
         <Stack.Screen name="Onboarding2" component={Onboarding2} />
-        <Stack.Screen name="MainTabs" component={MainTabs} />
+        <Stack.Screen name="MainTabs" component={DrawerNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );
