@@ -19,13 +19,26 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
   ];
 
   const handleLogout = () => {
-    console.log('Logout pressed');
-    // Implement logout logic here
+    Alert.alert(
+      'Logout',
+      'Apakah Anda yakin ingin logout?',
+      [
+        { text: 'Batal', style: 'cancel' },
+        { text: 'Logout', onPress: () => console.log('User logged out') }
+      ]
+    );
+  };
+
+  const handleMenuPress = (route: string) => {
+    navigation.navigate(route as any);
+    // Tutup drawer setelah memilih menu
+    navigation.closeDrawer();
   };
 
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
-      {/* Header dengan Avatar */}
+      
+      {/* HEADER - Avatar dan Nama Pengguna */}
       <View style={[styles.header, theme === 'dark' && styles.headerDark]}>
         <Image
           source={{ uri: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg' }}
@@ -39,13 +52,13 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
         </Text>
       </View>
 
-      {/* Menu Items */}
+      {/* MENU ITEMS - Home dan Settings */}
       <View style={styles.menuContainer}>
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.route}
             style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}
-            onPress={() => navigation.navigate(item.route)}
+            onPress={() => handleMenuPress(item.route)}
           >
             <Text style={styles.menuIcon}>{item.icon}</Text>
             <Text style={[styles.menuLabel, theme === 'dark' && styles.textDark]}>
@@ -55,8 +68,8 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
         ))}
       </View>
 
-      {/* Logout Button di Bawah */}
-      <View style={styles.footer}>
+      {/* FOOTER - Logout Button di Bagian Bawah */}
+      <View style={[styles.footer, theme === 'dark' && styles.footerDark]}>
         <TouchableOpacity
           style={[styles.logoutButton, theme === 'dark' && styles.logoutButtonDark]}
           onPress={handleLogout}
@@ -81,6 +94,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
+    paddingTop: 40, // Extra padding untuk status bar
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
     backgroundColor: '#F7FAFC',
@@ -90,13 +104,15 @@ const styles = StyleSheet.create({
     borderBottomColor: '#4A5568',
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 12,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: '#007AFF',
   },
   userName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#2D3748',
     marginBottom: 4,
@@ -106,13 +122,13 @@ const styles = StyleSheet.create({
     color: '#718096',
   },
   menuContainer: {
-    flex: 1,
-    paddingVertical: 10,
+    flex: 1, // Mengisi sisa space
+    paddingVertical: 20,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
+    paddingVertical: 16,
     paddingHorizontal: 20,
     backgroundColor: '#fff',
   },
@@ -120,37 +136,45 @@ const styles = StyleSheet.create({
     backgroundColor: '#1A202C',
   },
   menuIcon: {
-    fontSize: 20,
-    marginRight: 15,
-    width: 24,
+    fontSize: 24,
+    marginRight: 16,
+    width: 30,
   },
   menuLabel: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#2D3748',
+    fontWeight: '500',
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
+    backgroundColor: '#F7FAFC',
+  },
+  footerDark: {
+    backgroundColor: '#2D3748',
+    borderTopColor: '#4A5568',
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#F7FAFC',
-    borderRadius: 8,
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    backgroundColor: '#FF3B30',
+    borderRadius: 10,
   },
   logoutButtonDark: {
-    backgroundColor: '#2D3748',
+    backgroundColor: '#E53E3E',
   },
   logoutIcon: {
-    fontSize: 18,
+    fontSize: 20,
     marginRight: 12,
+    color: 'white',
   },
   logoutText: {
     fontSize: 16,
-    color: '#2D3748',
+    color: 'white',
     fontWeight: '600',
   },
   textDark: {
@@ -160,5 +184,8 @@ const styles = StyleSheet.create({
     color: '#A0AEC0',
   },
 });
+
+// Import Alert
+import { Alert } from 'react-native';
 
 export default CustomDrawer;
