@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
 import CustomDrawer from './CustomDrawer';
@@ -12,14 +12,9 @@ export type DrawerParamList = {
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 
-interface DrawerNavigatorProps {
-  drawerLockMode?: 'unlocked' | 'locked-closed' | 'locked-open';
-}
-
-const DrawerNavigator: React.FC<DrawerNavigatorProps> = ({ 
-  drawerLockMode = 'locked-closed' 
-}) => {
+const DrawerNavigator: React.FC = () => {
   const { theme } = useTheme();
+  const [drawerLocked, setDrawerLocked] = useState(false); // Default: UNLOCKED untuk testing
 
   return (
     <Drawer.Navigator
@@ -27,27 +22,34 @@ const DrawerNavigator: React.FC<DrawerNavigatorProps> = ({
       screenOptions={{
         drawerStyle: {
           backgroundColor: theme === 'dark' ? '#1A202C' : '#fff',
-          width: 280,
+          width: 320, // Lebar lebih besar
         },
         headerStyle: {
           backgroundColor: theme === 'dark' ? '#2D3748' : '#fff',
         },
         headerTintColor: theme === 'dark' ? '#F7FAFC' : '#2D3748',
         drawerType: 'front',
-        swipeEnabled: drawerLockMode === 'unlocked',
+        swipeEnabled: true, // PASTIKAN swipe enabled
         headerShown: true,
+        headerTitle: '', // Kosongkan title default
       }}
       defaultStatus="closed"
     >
       <Drawer.Screen 
         name="Home" 
         component={HomeScreen}
-        options={{ title: 'Beranda' }}
+        options={{ 
+          title: 'Beranda',
+          headerTitle: 'Mini E-Commerce' // Custom title
+        }}
       />
       <Drawer.Screen 
         name="Settings" 
         component={SettingsScreen}
-        options={{ title: 'Pengaturan' }}
+        options={{ 
+          title: 'Pengaturan',
+          headerTitle: 'Pengaturan'
+        }}
       />
     </Drawer.Navigator>
   );
