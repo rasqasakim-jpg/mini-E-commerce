@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import ProductCard from '../../../../components/ProductCard';
 
-const NewTab: React.FC = () => {
+const ElectronicsTab: React.FC = () => {
   const { theme } = useTheme();
 
   const newProducts = [
@@ -92,4 +92,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewTab;
+export default ElectronicsTab;

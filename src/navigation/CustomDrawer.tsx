@@ -5,16 +5,19 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
   const { theme } = useTheme();
+  const { isAuthenticated, logout } = useAuth();
   const { navigation } = props;
 
   const menuItems = [
-    { label: 'Home', icon: '🏠', route: 'Home' },
+    { label: 'Beranda', icon: '🏠', route: 'MainApp' },
     { label: 'Settings', icon: '⚙️', route: 'Settings' },
   ];
 
@@ -24,21 +27,19 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
       'Apakah Anda yakin ingin logout?',
       [
         { text: 'Batal', style: 'cancel' },
-        { text: 'Logout', onPress: () => console.log('User logged out') }
+        { text: 'Logout', onPress: () => logout() }
       ]
     );
   };
 
   const handleMenuPress = (route: string) => {
     navigation.navigate(route as any);
-    // Tutup drawer setelah memilih menu
     navigation.closeDrawer();
   };
 
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
       
-      {/* HEADER - Avatar dan Nama Pengguna */}
       <View style={[styles.header, theme === 'dark' && styles.headerDark]}>
         <Image
           source={{ uri: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg' }}
@@ -48,11 +49,13 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
           Defense Irgi Harnoyo
         </Text>
         <Text style={[styles.userEmail, theme === 'dark' && styles.textSecondaryDark]}>
-          irgiharnoyo@gmail.com
+          deffnoy@gmail.com
+        </Text>
+        <Text style={[styles.authStatus, theme === 'dark' && styles.textSecondaryDark]}>
+          Status: {isAuthenticated ? '✅ Login' : '❌ Logout'}
         </Text>
       </View>
 
-      {/* MENU ITEMS - Home dan Settings */}
       <View style={styles.menuContainer}>
         {menuItems.map((item) => (
           <TouchableOpacity
@@ -68,7 +71,6 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
         ))}
       </View>
 
-      {/* FOOTER - Logout Button di Bagian Bawah */}
       <View style={[styles.footer, theme === 'dark' && styles.footerDark]}>
         <TouchableOpacity
           style={[styles.logoutButton, theme === 'dark' && styles.logoutButtonDark]}
@@ -94,7 +96,7 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 20,
-    paddingTop: 40, // Extra padding untuk status bar
+    paddingTop: 40,
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
     backgroundColor: '#F7FAFC',
@@ -120,9 +122,15 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     color: '#718096',
+    marginBottom: 4,
+  },
+  authStatus: {
+    fontSize: 12,
+    color: '#718096',
+    fontStyle: 'italic',
   },
   menuContainer: {
-    flex: 1, // Mengisi sisa space
+    flex: 1,
     paddingVertical: 20,
   },
   menuItem: {
@@ -184,8 +192,5 @@ const styles = StyleSheet.create({
     color: '#A0AEC0',
   },
 });
-
-// Import Alert
-import { Alert } from 'react-native';
 
 export default CustomDrawer;

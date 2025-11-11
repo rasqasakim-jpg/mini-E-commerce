@@ -19,7 +19,7 @@ const PopularTab: React.FC = () => {
       id: '2', 
       name: 'Samsung Galaxy S23',
       price: 8999000,
-      imageUrl: 'https://i.pinimg.com/736x/07/83/6f/07836fa172bd7ecece2bd2bfc33ac371.jpg',
+      imageUrl: 'https://i.pinimg.com/1200x/ad/44/22/ad4422a51d0f4763d09f094f36329243.jpg',
       description: 'Smartphone flagship dengan kamera terbaik'
     },
       {
