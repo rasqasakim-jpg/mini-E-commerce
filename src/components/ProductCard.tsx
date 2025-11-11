@@ -4,32 +4,48 @@ import {
   Text,
   Image,
   StyleSheet,
-  Dimensions,
   useWindowDimensions,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { Product } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { HomeStackParamList } from '../navigation/HomeStackNavigator';
 
 interface ProductCardProps {
   product: Product;
 }
+
+type ProductCardNavigationProp = StackNavigationProp<HomeStackParamList, 'HomeTabs'>;
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { theme } = useTheme();
   const { width } = useWindowDimensions();
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  
+  const navigation = useNavigation<ProductCardNavigationProp>();
 
-  // Responsive card width calculation
-  const CARD_WIDTH = (width - 48) / 2; // 16px padding + 8px margin
+  const CARD_WIDTH = (width - 48) / 2;
+
+  // ✅ SOAL 2: Navigasi ke Detail Produk
+  const handleProductPress = () => {
+    console.log('Navigating to product detail:', product.id);
+    navigation.navigate('ProductDetail', { productId: product.id });
+  };
 
   return (
-    <View style={[
-      styles.card, 
-      theme === 'dark' && styles.cardDark,
-      { width: CARD_WIDTH }
-    ]}>
+    <TouchableOpacity 
+      style={[
+        styles.card, 
+        theme === 'dark' && styles.cardDark,
+        { width: CARD_WIDTH }
+      ]}
+      onPress={handleProductPress}
+      activeOpacity={0.7}
+    >
       <View style={styles.imageContainer}>
         {imageLoading && (
           <View style={styles.loadingContainer}>
@@ -72,7 +88,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {product.description}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -82,10 +98,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     margin: 4,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
@@ -108,10 +121,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    top: 0, left: 0, right: 0, bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F7FAFC',

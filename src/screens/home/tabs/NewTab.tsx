@@ -18,7 +18,7 @@ const NewTab: React.FC = () => {
       id: '11',
       name: 'Samsung s25 Ultra',
       price: 25000000,
-      imageUrl: 'https://i.pinimg.com/736x/d9/82/12/d982123a83fe7a0f6c5ca92e5ea2d814.jpg',
+      imageUrl: 'https://i.pinimg.com/1200x/ad/44/22/ad4422a51d0f4763d09f094f36329243.jpg',
       description: 'Samsung terbaru'
     },
     

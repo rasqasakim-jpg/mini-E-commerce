@@ -6,12 +6,38 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ProfileScreen: React.FC = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
+  const { isAuthenticated, login, logout } = useAuth();
 
+  // ✅ SOAL 5: Auth Guard - Tampilkan placeholder jika belum login
+  if (!isAuthenticated) {
+    return (
+      <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
+        <View style={[styles.authPlaceholder, theme === 'dark' && styles.authPlaceholderDark]}>
+          <Text style={[styles.authTitle, theme === 'dark' && styles.textDark]}>
+            🔐 Harap Login
+          </Text>
+          <Text style={[styles.authDescription, theme === 'dark' && styles.textSecondaryDark]}>
+            Anda harus login untuk mengakses halaman profile
+          </Text>
+          <TouchableOpacity
+            style={[styles.loginButton, theme === 'dark' && styles.loginButtonDark]}
+            onPress={() => login('dummy-token-123')}
+          >
+            <Text style={styles.loginButtonText}>📱 Login Sekarang</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  // Konten profil asli hanya dimuat jika sudah login
   return (
     <ScrollView style={[styles.container, theme === 'dark' && styles.containerDark]}>
       <View style={styles.header}>
@@ -19,55 +45,35 @@ const ProfileScreen: React.FC = () => {
           source={{ uri: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg' }}
           style={styles.avatar}
         />
-        <Text style={[styles.name, theme === 'dark' && styles.textDark]}>
-          Defense Irgi Harnoyo
-        </Text>
-        <Text style={[styles.email, theme === 'dark' && styles.textSecondaryDark]}>
-          irgiharnoyo@gmail.com
+        <Text style={[styles.name, theme === 'dark' && styles.textDark]}>Defense Irgi Harnoyo</Text>
+        <Text style={[styles.email, theme === 'dark' && styles.textSecondaryDark]}>deffnoy@gmail.com</Text>
+        <Text style={[styles.authStatus, theme === 'dark' && styles.textSecondaryDark]}>
+          Status: ✅ Terautentikasi
         </Text>
       </View>
 
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
-          Pengaturan
-        </Text>
+        <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>Pengaturan Akun</Text>
         
-        <TouchableOpacity 
-          style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}
-          onPress={toggleTheme}
-        >
-          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-            Tema {theme === 'light' ? 'Gelap' : 'Terang'}
-          </Text>
-          <Text style={styles.menuIcon}>
-            {theme === 'light' ? '🌙' : '☀️'}
-          </Text>
+        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
+          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>✏️ Edit Profile</Text>
         </TouchableOpacity>
 
-        <View style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-            Notifikasi
-          </Text>
-          <Text style={styles.menuIcon}>🔔</Text>
-        </View>
+        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
+          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>🔐 Ubah Password</Text>
+        </TouchableOpacity>
 
-        <View style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-            Bantuan
-          </Text>
-          <Text style={styles.menuIcon}>❓</Text>
-        </View>
+        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
+          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>🔔 Notifikasi</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
-          Tentang Aplikasi
-        </Text>
-        <Text style={[styles.aboutText, theme === 'dark' && styles.textSecondaryDark]}>
-          Mini E-Commerce App v1.0.0{'\n'}
-          Dibangun dengan React Native & TypeScript
-        </Text>
-      </View>
+      <TouchableOpacity
+        style={[styles.logoutButton, theme === 'dark' && styles.logoutButtonDark]}
+        onPress={logout}
+      >
+        <Text style={styles.logoutButtonText}>🚪 Logout</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -80,6 +86,48 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#1A202C',
   },
+  // Styles untuk auth placeholder
+  authPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    backgroundColor: '#EDF2F7',
+    margin: 20,
+    borderRadius: 12,
+  },
+  authPlaceholderDark: {
+    backgroundColor: '#2D3748',
+  },
+  authTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#2D3748',
+    textAlign: 'center',
+  },
+  authDescription: {
+    fontSize: 16,
+    color: '#718096',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  loginButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 10,
+  },
+  loginButtonDark: {
+    backgroundColor: '#3182CE',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Styles untuk konten profil
   header: {
     alignItems: 'center',
     padding: 24,
@@ -104,14 +152,15 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 16,
     color: '#718096',
+    marginBottom: 8,
+  },
+  authStatus: {
+    fontSize: 14,
+    color: '#718096',
+    fontStyle: 'italic',
   },
   section: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  sectionDark: {
-    borderBottomColor: '#4A5568',
   },
   sectionTitle: {
     fontSize: 18,
@@ -120,12 +169,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
     backgroundColor: '#fff',
+    padding: 16,
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -136,13 +181,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#2D3748',
   },
-  menuIcon: {
-    fontSize: 18,
+  logoutButton: {
+    backgroundColor: '#FF3B30',
+    padding: 16,
+    margin: 16,
+    borderRadius: 10,
+    alignItems: 'center',
   },
-  aboutText: {
-    fontSize: 14,
-    color: '#718096',
-    lineHeight: 20,
+  logoutButtonDark: {
+    backgroundColor: '#E53E3E',
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   textDark: {
     color: '#F7FAFC',

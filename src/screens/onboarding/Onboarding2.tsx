@@ -13,7 +13,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 type RootStackParamList = {
   Onboarding1: undefined;
   Onboarding2: undefined;
-  MainTabs: undefined;
+  MainApp: undefined; // ✅ PASTIKAN MainApp ada di type
 };
 
 type Onboarding2NavigationProp = StackNavigationProp<RootStackParamList, 'Onboarding2'>;
@@ -27,7 +27,7 @@ const Onboarding2: React.FC<Props> = ({ navigation }) => {
   const { width } = useWindowDimensions();
 
   const handleGetStarted = () => {
-    navigation.navigate('MainTabs');
+    navigation.navigate('MainApp'); // ✅ NAVIGASI KE MainApp
   };
 
   return (

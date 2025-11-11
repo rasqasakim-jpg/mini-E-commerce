@@ -1,0 +1,50 @@
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import { useTheme } from '../contexts/ThemeContext';
+import HomeTabsNavigator from './HomeTabsNavigator';
+import ProductDetailScreen from '../screens/product/ProductDetailScreen';
+
+export type HomeStackParamList = {
+  HomeTabs: undefined;
+  ProductDetail: { productId: string };
+};
+
+const Stack = createStackNavigator<HomeStackParamList>();
+
+const HomeStackNavigator: React.FC = () => {
+  const { theme } = useTheme();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme === 'dark' ? '#2D3748' : '#fff',
+        },
+        headerTintColor: theme === 'dark' ? '#F7FAFC' : '#2D3748',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        cardStyle: {
+          backgroundColor: theme === 'dark' ? '#1A202C' : '#F7FAFC',
+        },
+      }}
+    >
+      <Stack.Screen 
+        name="HomeTabs" 
+        component={HomeTabsNavigator}
+        options={{ 
+          title: 'Mini E-Commerce',
+        }}
+      />
+      <Stack.Screen 
+        name="ProductDetail" 
+        component={ProductDetailScreen}
+        options={{ 
+          title: 'Detail Produk',
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+export default HomeStackNavigator;
