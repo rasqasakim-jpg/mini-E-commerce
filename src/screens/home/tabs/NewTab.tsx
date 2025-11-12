@@ -13,42 +13,41 @@ import { Product } from '../../../types';
 const newProducts: Product[] = [
   {
     id: 'n1',
-    name: 'iPhone 15 Pro Max',
+    name: 'iPhone 15 Pro',
     price: 24999000,
-    imageUrl: 'https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-7inch-naturaltitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1692846359318',
-    description: 'iPhone terbaru dengan titanium',
+    imageUrl: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&h=300&fit=crop',
+    description: 'iPhone terbaru dengan titanium body',
     category: 'electronics',
-    discount: 10
+    discount: 5
   },
   {
     id: 'n2',
-    name: 'Samsung Galaxy Z Flip5',
+    name: 'Samsung Galaxy Z Flip',
     price: 15999000,
-    imageUrl: 'https://images.samsung.com/is/image/samsung/p6pim/id/2307/gallery/id-galaxy-z-flip5-f731--sm-f731blbexid-536258331?$650_519_PNG$',
+    imageUrl: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&h=300&fit=crop',
     description: 'Smartphone foldable terbaru',
     category: 'electronics',
-    discount: 15
+    discount: 10
   },
   {
     id: 'n3',
     name: 'MacBook Pro M3',
     price: 29999000,
-    imageUrl: 'https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp-14-2023?wid=2000&hei=1536&fmt=jpeg&qlt=95&.v=1684268261126',
+    imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop',
     description: 'Laptop profesional dengan chip M3',
     category: 'electronics',
-    discount: 5
+    discount: 8
   },
   {
     id: 'n4',
     name: 'Sony WH-1000XM5',
     price: 4999000,
-    imageUrl: 'https://www.sony.co.id/image/5a6e12d5e4d6c9664cbbc6b9d3b4c9f3?fmt=pjpeg&bgcolor=FFFFFF&bgc=FFFFFF&wid=2515&hei=1320',
+    imageUrl: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=300&fit=crop',
     description: 'Headphone noise cancelling terbaru',
     category: 'electronics',
-    discount: 8
+    discount: 12
   }
 ];
-
 const NewTab: React.FC = () => {
   const { theme } = useTheme();
   const { width, height } = useWindowDimensions();

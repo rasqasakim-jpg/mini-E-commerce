@@ -13,62 +13,53 @@ import { Product } from '../../../../types';
 const foodProducts: Product[] = [
   {
     id: 'f1',
-    name: 'Indomie Goreng Special',
+    name: 'Indomie Goreng',
     price: 3500,
-    imageUrl: 'https://www.indomie.com/uploads/products/indomie-goreng-special-1.png',
+    imageUrl: 'https://images.unsplash.com/photo-1593030103066-0093718efeb9?w=400&h=300&fit=crop',
     description: 'Mi instan goreng rasa special',
-    category: 'food',
-    rating: 4.8
+    category: 'food'
   },
   {
     id: 'f2',
-    name: 'Ultra Milk Full Cream',
+    name: 'Ultra Milk',
     price: 8000,
-    imageUrl: 'https://www.ultramilk.co.id/storage/app/uploads/public/62c/6c8/98c/62c6c898c2d1e991314945.png',
+    imageUrl: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=300&fit=crop',
     description: 'Susu UHT full cream 250ml',
-    category: 'food',
-    rating: 4.5
+    category: 'food'
   },
   {
     id: 'f3',
-    name: 'Kopi Kapal Api Special',
+    name: 'Kopi Kapal Api',
     price: 15000,
-    imageUrl: 'https://kapalapi.com/wp-content/uploads/2021/06/kape-kapal-api-special-200gr-front-1.png',
+    imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&h=300&fit=crop',
     description: 'Kopi bubuk special 200gr',
-    category: 'food',
-    discount: 10,
-    rating: 4.7
+    category: 'food'
   },
   {
     id: 'f4',
-    name: 'Roti Tawar Sari Roti',
+    name: 'Roti Tawar',
     price: 18000,
-    imageUrl: 'https://sariroti.com/assets/images/products/roti-tawar-regular.png',
+    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop',
     description: 'Roti tawar fresh 450gr',
-    category: 'food',
-    rating: 4.3
+    category: 'food'
   },
   {
     id: 'f5',
-    name: 'Chitato Potato Chips',
+    name: 'Chitato Chips',
     price: 12000,
-    imageUrl: 'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//101/MTA-3518945/chitato_chitato-keju-65gr_full02.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1566478901221-4dd2f8b6a299?w=400&h=300&fit=crop',
     description: 'Keripik kentang rasa keju',
-    category: 'food',
-    discount: 15,
-    rating: 4.6
+    category: 'food'
   },
   {
     id: 'f6',
-    name: 'Aqua Mineral Water',
+    name: 'Aqua Mineral',
     price: 4000,
-    imageUrl: 'https://www.aqua.com/uploads/products/aqua-330ml.png',
+    imageUrl: 'https://images.unsplash.com/photo-1548839149-851a5c9dbfb9?w=400&h=300&fit=crop',
     description: 'Air mineral 600ml',
-    category: 'food',
-    rating: 4.9
+    category: 'food'
   }
 ];
-
 const FoodTab: React.FC = () => {
   const { theme } = useTheme();
   const { width, height } = useWindowDimensions();

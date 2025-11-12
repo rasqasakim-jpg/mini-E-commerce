@@ -15,19 +15,50 @@ const electronicsProducts: Product[] = [
     id: 'e1',
     name: 'iPhone 14 Pro',
     price: 19999000,
-    imageUrl: 'https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/iphone-14-pro-model-unselect-gallery-2-202209?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1660753617539',
-    description: 'iPhone terbaru dengan dynamic island',
+    imageUrl: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop',
+    description: 'iPhone dengan dynamic island',
     category: 'electronics'
   },
   {
     id: 'e2', 
     name: 'Samsung Galaxy S23',
     price: 8999000,
-    imageUrl: 'https://i.pinimg.com/736x/07/83/6f/07836fa172bd7ecece2bd2bfc33ac371.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
     description: 'Smartphone flagship Samsung',
     category: 'electronics'
   },
-  // Add more products...
+  {
+    id: 'e3',
+    name: 'MacBook Pro',
+    price: 22999000,
+    imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop',
+    description: 'Laptop untuk profesional kreatif',
+    category: 'electronics'
+  },
+  {
+    id: 'e4',
+    name: 'iPad Air',
+    price: 12999000,
+    imageUrl: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop',
+    description: 'Tablet serbaguna untuk kerja dan hiburan',
+    category: 'electronics'
+  },
+  {
+    id: 'e5',
+    name: 'AirPods Pro',
+    price: 3999000,
+    imageUrl: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=400&h=300&fit=crop',
+    description: 'Earbuds wireless dengan noise cancelling',
+    category: 'electronics'
+  },
+  {
+    id: 'e6',
+    name: 'Smart TV 55"',
+    price: 8999000,
+    imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=300&fit=crop',
+    description: 'TV 4K Ultra HD dengan Smart Features',
+    category: 'electronics'
+  }
 ];
 
 const ElectronicsTab: React.FC = () => {

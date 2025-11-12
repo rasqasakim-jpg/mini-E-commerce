@@ -13,49 +13,49 @@ import { Product } from '../../../../types';
 const entertainmentProducts: Product[] = [
   {
     id: 'en1',
-    name: 'Sony PlayStation 5',
+    name: 'PlayStation 5',
     price: 8999000,
-    imageUrl: 'https://gmedia.playstation.com/is/image/SIEPDC/ps5-product-thumbnail-01-en-14sep21?$1600px--t$',
+    imageUrl: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=400&h=300&fit=crop',
     description: 'Console gaming next generation',
     category: 'entertainment'
   },
   {
     id: 'en2',
-    name: 'Nintendo Switch OLED',
+    name: 'Nintendo Switch',
     price: 4999000,
-    imageUrl: 'https://cdn01.nintendo-europe.com/media/images/10_share_images/systems_15/nintendo_switch_4/H2x1_NSwitch_OLED_model.png',
+    imageUrl: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=400&h=300&fit=crop',
     description: 'Console hybrid gaming portable',
     category: 'entertainment'
   },
   {
     id: 'en3',
-    name: 'JBL Flip 6 Speaker',
+    name: 'JBL Speaker',
     price: 2499000,
-    imageUrl: 'https://www.jbl.com/dw/image/v2/AAUJ_PRD/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw9a31e67d/JBL_FLIP_6_HERO_BLUE_0456_x3.png?sw=535&sh=535',
+    imageUrl: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=300&fit=crop',
     description: 'Bluetooth speaker waterproof',
     category: 'entertainment'
   },
   {
     id: 'en4',
-    name: 'Sony WH-1000XM4',
+    name: 'Sony Headphones',
     price: 3999000,
-    imageUrl: 'https://www.sony.co.id/image/5a6e12d5e4d6c9664cbbc6b9d3b4c9f3?fmt=pjpeg&bgcolor=FFFFFF&bgc=FFFFFF&wid=2515&hei=1320',
+    imageUrl: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=300&fit=crop',
     description: 'Headphone noise cancelling premium',
     category: 'entertainment'
   },
   {
     id: 'en5',
-    name: 'Xbox Wireless Controller',
+    name: 'Xbox Controller',
     price: 899000,
-    imageUrl: 'https://compass-ssl.xbox.com/assets/54/45/54450e89-3c3a-42f8-bdec-252d2c52b6e1.png?n=XBX_A-BuyBoxBGImage02-D.png',
+    imageUrl: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400&h=300&fit=crop',
     description: 'Controller wireless untuk Xbox/PC',
     category: 'entertainment'
   },
   {
     id: 'en6',
-    name: '4K Ultra HD Blu-ray Movie',
+    name: '4K Blu-ray Movie',
     price: 299000,
-    imageUrl: 'https://m.media-amazon.com/images/I/81zZYpM-1aL._SL1500_.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1489599804158-91c796e572e6?w=400&h=300&fit=crop',
     description: 'Film koleksi 4K Ultra HD',
     category: 'entertainment'
   }
