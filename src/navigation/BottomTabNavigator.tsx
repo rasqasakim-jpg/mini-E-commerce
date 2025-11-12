@@ -5,17 +5,20 @@ import { useTheme } from '../contexts/ThemeContext';
 import HomeStackNavigator from './HomeStackNavigator';
 import ProductCatalogScreen from '../screens/catalog/ProductCatalogScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
 export type BottomTabParamList = {
   HomeStack: undefined;
   Catalog: undefined;
-  Profile: undefined;
+  Profile: { userId?: string }; // ✅ PROFILE BISA TERIMA userId
 };
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator: React.FC = () => {
   const { theme } = useTheme();
+  const route = useRoute<RouteProp<BottomTabParamList, 'Profile'>>();
+  const userId = route.params?.userId; // ✅ AMBIL userId dari parameter
 
   return (
     <Tab.Navigator
@@ -56,6 +59,7 @@ const BottomTabNavigator: React.FC = () => {
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen}
+        initialParams={{ userId }} // ✅ TERUSKAN userId ke ProfileScreen
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => (

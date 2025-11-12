@@ -1,50 +1,94 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
-import { useTheme } from '../../../../contexts/ThemeContext'; 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  useWindowDimensions,
+} from 'react-native';
+import { useTheme } from '../../../../contexts/ThemeContext';
 import ProductCard from '../../../../components/ProductCard';
+import { Product } from '../../../../types';
+
+const automotiveProducts: Product[] = [
+  {
+    id: 'a1',
+    name: 'Michelin Pilot Sport 4',
+    price: 1850000,
+    imageUrl: 'https://www.michelin.co.id/wp-content/uploads/2021/06/pilot-sport-4.png',
+    description: 'Ban performa tinggi untuk mobil sport',
+    category: 'automotive'
+  },
+  {
+    id: 'a2',
+    name: 'Castrol Magnatec Engine Oil',
+    price: 250000,
+    imageUrl: 'https://www.castrol.com/content/dam/castrol/country-sites/en_id/indonesia/home/products/magnatec-stop-start-5w-30.png',
+    description: 'Oli mesin synthetic 1L',
+    category: 'automotive'
+  },
+  {
+    id: 'a3',
+    name: 'Bosch Car Battery',
+    price: 1250000,
+    imageUrl: 'https://www.bosch-aftermarket.com/content/dam/bosch-aftermarket/indonesia/products/automotive-parts/batteries/s5-005-12v-60ah-540a-en.png',
+    description: 'Aki mobil 12V 60Ah',
+    category: 'automotive'
+  },
+  {
+    id: 'a4',
+    name: '3M Car Wax',
+    price: 185000,
+    imageUrl: 'https://multimedia.3m.com/mws/media/1364106O/3m-36013-car-wax.png',
+    description: 'Wax pelindung cat mobil',
+    category: 'automotive'
+  },
+  {
+    id: 'a5',
+    name: 'Car Vacuum Cleaner',
+    price: 350000,
+    imageUrl: 'https://www.blackanddecker.com/content/dam/brand/global/products/vacuums/BDV-series/BDV125/BDV125-1.png',
+    description: 'Vacuum cleaner portable untuk mobil',
+    category: 'automotive'
+  },
+  {
+    id: 'a6',
+    name: 'Car Phone Holder',
+    price: 85000,
+    imageUrl: 'https://www.rammount.com/images/products/ramb166zua19_1.png',
+    description: 'Holder smartphone untuk dashboard',
+    category: 'automotive'
+  }
+];
 
 const AutomotiveTab: React.FC = () => {
   const { theme } = useTheme();
+  const { width, height } = useWindowDimensions();
+  
+  const isLandscape = width > height;
+  const numColumns = isLandscape ? 3 : 2;
 
-  const newProducts = [
-    {
-      id: '28',
-      name: 'kunci pas',
-      price: 400000,
-      imageUrl: 'https://i.pinimg.com/736x/fe/c5/ad/fec5ad6962de18ef1dd4f66c4bf20240.jpg',
-      description: 'Kunci Pas Kode : 01002000412 Merk : TEKIRO Tipe : 18 X 19 mm Status : Siap Berat Kirim : 1 kg Material : Chrome Vanadium'
-    },
-     {
-      id: '29',
-      name: 'Hummer Drill',
-      price: 80000,
-      imageUrl: 'https://i.pinimg.com/1200x/87/ae/58/87ae5830560b97d11d1a99d8c1865431.jpg',
-      description: 'Shop Senix X2 18V Brushless Hammer Drill Skin at Hammer Roo. Fast shipping Australia wide.'
-    },
-      {
-      id: '30',
-      name: 'kunci pas',
-      price: 50000,
-      imageUrl: 'https://i.pinimg.com/736x/d0/52/59/d05259b3b68f3d35278a0a889d54a2f4.jpg',
-      description: 'kunci pas bulat'
-    },
-      {
-      id: '31',
-      name: 'Obeng plus min',
-      price: 80000,
-      imageUrl: 'https://i.pinimg.com/1200x/69/59/1f/69591f25adf7d5fb5aa4dcea24e76c0c.jpg',
-      description: 'obeng gagang karet +/-'
-    },
-  ];
+  const renderProductItem = ({ item }: { item: Product }) => (
+    <ProductCard product={item} />
+  );
 
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
+      <Text style={[styles.title, theme === 'dark' && styles.textDark]}>
+        🚗 Otomotif & Aksesoris
+      </Text>
+      <Text style={[styles.subtitle, theme === 'dark' && styles.textSecondaryDark]}>
+        Perlengkapan dan sparepart kendaraan
+      </Text>
+      
       <FlatList
-        data={newProducts}
-        renderItem={({ item }) => <ProductCard product={item} />}
+        data={automotiveProducts}
+        renderItem={renderProductItem}
         keyExtractor={(item) => item.id}
-        numColumns={2}
+        numColumns={numColumns}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        key={numColumns}
       />
     </View>
   );
@@ -54,13 +98,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F7FAFC',
-    padding: 8,
+    paddingHorizontal: 8,
   },
   containerDark: {
     backgroundColor: '#1A202C',
   },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 16,
+    color: '#2D3748',
+  },
+  subtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 16,
+    color: '#718096',
+  },
   listContent: {
     paddingBottom: 20,
+  },
+  textDark: {
+    color: '#F7FAFC',
+  },
+  textSecondaryDark: {
+    color: '#A0AEC0',
   },
 });
 

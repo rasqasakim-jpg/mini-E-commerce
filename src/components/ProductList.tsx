@@ -58,7 +58,7 @@ const ProductList: React.FC<ProductListProps> = ({
             style={[styles.addButton, theme === 'dark' && styles.addButtonDark]}
             onPress={onAddProductPress}
           >
-            <Text style={styles.addButtonText}>+ Tambah Produk</Text>
+            <Text style={styles.addButtonText}>Add produk</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -4,6 +4,11 @@ export interface Product {
   price: number;
   imageUrl: string;
   description: string;
+  category: string;
+  discount?: number;
+  rating?: number;
+  stock?: number;
+  brand?: string;
 }
 
 export interface ProductFormData {
@@ -11,15 +16,39 @@ export interface ProductFormData {
   price: string;
   imageUrl: string;
   description: string;
+  category: string;
 }
 
-export type ValidatableFields = 'name' | 'price' | 'imageUrl';
-export type ValidationErrors = Partial<Record<ValidatableFields, string>>;
+// ✅ PERBAIKAN: Gunakan Record<string, string> untuk ValidationErrors
+export type ValidationErrors = Record<string, string>;
 
-// Tambahkan type untuk theme
-export type Theme = 'light' | 'dark';
+export type ValidatableFields = 'name' | 'price' | 'imageUrl' | 'category' | 'description';
 
-export interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  phone?: string;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  products: CartItem[];
+  total: number;
+  status: 'pending' | 'completed' | 'cancelled';
+  createdAt: string;
+  address?: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  productCount: number;
 }

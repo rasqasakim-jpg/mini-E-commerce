@@ -11,10 +11,15 @@ import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
-const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
+// ✅ TAMBAH interface untuk props
+interface CustomDrawerProps extends DrawerContentComponentProps {
+  userId?: string;
+}
+
+const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
   const { theme } = useTheme();
   const { isAuthenticated, logout } = useAuth();
-  const { navigation } = props;
+  const { navigation, userId } = props; // ✅ DESTRUCTURE userId dari props
 
   const menuItems = [
     { label: 'Beranda', icon: '🏠', route: 'MainApp' },
@@ -51,6 +56,14 @@ const CustomDrawer: React.FC<DrawerContentComponentProps> = (props) => {
         <Text style={[styles.userEmail, theme === 'dark' && styles.textSecondaryDark]}>
           deffnoy@gmail.com
         </Text>
+        
+        {/* ✅ TAMPILKAN userId JIKA ADA */}
+        {userId && (
+          <Text style={[styles.userId, theme === 'dark' && styles.textSecondaryDark]}>
+            User ID: {userId}
+          </Text>
+        )}
+        
         <Text style={[styles.authStatus, theme === 'dark' && styles.textSecondaryDark]}>
           Status: {isAuthenticated ? '✅ Login' : '❌ Logout'}
         </Text>
@@ -123,6 +136,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#718096',
     marginBottom: 4,
+  },
+  // ✅ TAMBAH style untuk userId
+  userId: {
+    fontSize: 12,
+    color: '#718096',
+    marginBottom: 4,
+    fontWeight: '600',
+    fontStyle: 'italic',
   },
   authStatus: {
     fontSize: 12,
