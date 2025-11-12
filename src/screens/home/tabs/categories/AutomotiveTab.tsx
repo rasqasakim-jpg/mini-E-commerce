@@ -13,49 +13,49 @@ import { Product } from '../../../../types';
 const automotiveProducts: Product[] = [
   {
     id: 'a1',
-    name: 'Michelin Pilot Sport 4',
+    name: 'Michelin Tire',
     price: 1850000,
-    imageUrl: 'https://www.michelin.co.id/wp-content/uploads/2021/06/pilot-sport-4.png',
-    description: 'Ban performa tinggi untuk mobil sport',
+    imageUrl: 'https://images.unsplash.com/photo-1603712610496-5368a6c44998?w=400&h=300&fit=crop',
+    description: 'Ban performa tinggi untuk mobil',
     category: 'automotive'
   },
   {
     id: 'a2',
-    name: 'Castrol Magnatec Engine Oil',
+    name: 'Engine Oil',
     price: 250000,
-    imageUrl: 'https://www.castrol.com/content/dam/castrol/country-sites/en_id/indonesia/home/products/magnatec-stop-start-5w-30.png',
+    imageUrl: 'https://images.unsplash.com/photo-1627485937981-bcffa38b0bdc?w=400&h=300&fit=crop',
     description: 'Oli mesin synthetic 1L',
     category: 'automotive'
   },
   {
     id: 'a3',
-    name: 'Bosch Car Battery',
+    name: 'Car Battery',
     price: 1250000,
-    imageUrl: 'https://www.bosch-aftermarket.com/content/dam/bosch-aftermarket/indonesia/products/automotive-parts/batteries/s5-005-12v-60ah-540a-en.png',
+    imageUrl: 'https://images.unsplash.com/photo-1603712610496-5368a6c44998?w=400&h=300&fit=crop',
     description: 'Aki mobil 12V 60Ah',
     category: 'automotive'
   },
   {
     id: 'a4',
-    name: '3M Car Wax',
+    name: 'Car Wax',
     price: 185000,
-    imageUrl: 'https://multimedia.3m.com/mws/media/1364106O/3m-36013-car-wax.png',
+    imageUrl: 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=400&h=300&fit=crop',
     description: 'Wax pelindung cat mobil',
     category: 'automotive'
   },
   {
     id: 'a5',
-    name: 'Car Vacuum Cleaner',
+    name: 'Car Vacuum',
     price: 350000,
-    imageUrl: 'https://www.blackanddecker.com/content/dam/brand/global/products/vacuums/BDV-series/BDV125/BDV125-1.png',
+    imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop',
     description: 'Vacuum cleaner portable untuk mobil',
     category: 'automotive'
   },
   {
     id: 'a6',
-    name: 'Car Phone Holder',
+    name: 'Phone Holder',
     price: 85000,
-    imageUrl: 'https://www.rammount.com/images/products/ramb166zua19_1.png',
+    imageUrl: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop',
     description: 'Holder smartphone untuk dashboard',
     category: 'automotive'
   }

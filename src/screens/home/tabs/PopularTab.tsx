@@ -23,7 +23,7 @@ const popularProducts: Product[] = [
     id: '1',
     name: 'iPhone 14 Pro',
     price: 19999000,
-    imageUrl: 'https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/iphone-14-pro-model-unselect-gallery-2-202209?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1660753617539',
+    imageUrl: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&h=300&fit=crop',
     description: 'iPhone terbaru dengan dynamic island dan kamera 48MP',
     category: 'electronics',
     rating: 4.9,
@@ -33,7 +33,7 @@ const popularProducts: Product[] = [
     id: '2',
     name: 'Samsung Galaxy S23',
     price: 8999000,
-    imageUrl: 'https://i.pinimg.com/736x/07/83/6f/07836fa172bd7ecece2bd2bfc33ac371.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
     description: 'Smartphone flagship dengan kamera terbaik',
     category: 'electronics',
     discount: 15,
@@ -43,42 +43,41 @@ const popularProducts: Product[] = [
     id: '3',
     name: 'MacBook Air M2',
     price: 15999000,
-    imageUrl: 'https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/macbook-air-m2-202206?wid=2000&hei=1536&fmt=jpeg&qlt=95&.v=1664497359481',
+    imageUrl: 'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400&h=300&fit=crop',
     description: 'Laptop tipis dan ringan dengan chip M2',
     category: 'electronics',
     rating: 4.7
   },
   {
     id: '4',
-    name: 'Nike Air Max 270',
+    name: 'Nike Air Force 1',
     price: 1899000,
-    imageUrl: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/air-max-270-shoes-WRlPKR.png',
-    description: 'Sepatu sneaker dengan cushioning terbaik',
+    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop',
+    description: 'Sepatu sneaker klasik yang nyaman',
     category: 'clothing',
     discount: 20,
     rating: 4.6
   },
   {
     id: '5',
-    name: 'Sony WH-1000XM4',
-    price: 3999000,
-    imageUrl: 'https://www.sony.co.id/image/5a6e12d5e4d6c9664cbbc6b9d3b4c9f3?fmt=pjpeg&bgcolor=FFFFFF&bgc=FFFFFF&wid=2515&hei=1320',
-    description: 'Headphone noise cancelling premium',
+    name: 'Sony Headphones',
+    price: 2999000,
+    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+    description: 'Headphone wireless dengan noise cancelling',
     category: 'electronics',
     discount: 25,
     rating: 4.8
   },
   {
     id: '6',
-    name: 'Indomie Goreng Special',
+    name: 'Indomie Goreng',
     price: 3500,
-    imageUrl: 'https://www.indomie.com/uploads/products/indomie-goreng-special-1.png',
+    imageUrl: 'https://images.unsplash.com/photo-1593030103066-0093718efeb9?w=400&h=300&fit=crop',
     description: 'Mi instan goreng rasa special',
     category: 'food',
     rating: 4.9
   }
 ];
-
 const PopularTab: React.FC = () => {
   const { theme } = useTheme();
   const { width, height } = useWindowDimensions();

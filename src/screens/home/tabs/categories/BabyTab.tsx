@@ -13,66 +13,50 @@ import { Product } from '../../../../types';
 const babyProducts: Product[] = [
   {
     id: 'b1',
-    name: 'Pampers Premium Care',
+    name: 'Baby Diapers',
     price: 125000,
-    imageUrl: 'https://www.pampers.com/en-us/sites/pampers_us/files/styles/product_image/public/lpn-pampers-premium-care-newborn-diapers.png?itok=ZfKqXqJ6',
+    imageUrl: 'https://images.unsplash.com/photo-1584839404049-94c6c0a78e13?w=400&h=300&fit=crop',
     description: 'Popok bayi size M 32 pcs',
     category: 'baby'
   },
   {
     id: 'b2',
-    name: 'Philips Avent Baby Bottle',
+    name: 'Baby Bottle',
     price: 85000,
-    imageUrl: 'https://www.philips.co.id/c-dam/b2c/master/catalog-pdp-pet/AVENT-natural-baby-bottle-260ml-SCF673-27.png',
+    imageUrl: 'https://images.unsplash.com/photo-1571781418607-64dacd784b0a?w=400&h=300&fit=crop',
     description: 'Botol susu bayi 260ml',
     category: 'baby'
   },
   {
     id: 'b3',
-    name: 'MamyPoko Extra Dry',
-    price: 95000,
-    imageUrl: 'https://mamypoko.co.id/images/products/pants-m.png',
-    description: 'Popok celana size M 22 pcs',
-    category: 'baby'
-  },
-  {
-    id: 'b4',
-    name: 'Baby Stroller Portable',
+    name: 'Baby Stroller',
     price: 750000,
-    imageUrl: 'https://www.babyzen.com/wp-content/uploads/2021/06/BABYZEN-YOYO2_06-2021_Stroller_Graphite-Grey_Fold_Right.png',
+    imageUrl: 'https://images.unsplash.com/photo-1508779938392-316b9ef9ff48?w=400&h=300&fit=crop',
     description: 'Kereta dorong bayi lipat portable',
     category: 'baby'
   },
   {
-    id: 'b5',
-    name: 'Johnson Baby Shampoo',
+    id: 'b4',
+    name: 'Baby Shampoo',
     price: 25000,
-    imageUrl: 'https://www.johnsonsbaby.com/sites/jbaby_us/files/styles/product_image/public/product-images/johnsons-baby-shampoo-15oz-front.png?itok=6Zf9ZJ9Q',
+    imageUrl: 'https://images.unsplash.com/photo-1584305574647-469b2f461d46?w=400&h=300&fit=crop',
     description: 'Shampoo bayi 100ml',
     category: 'baby'
   },
   {
-    id: 'b6',
-    name: 'Baby Toy Educational Set',
+    id: 'b5',
+    name: 'Baby Toys',
     price: 150000,
-    imageUrl: 'https://www.fisher-price.com/content/dam/fp/multi-images/play-learn-toy-images/CGN33.png',
+    imageUrl: 'https://images.unsplash.com/photo-1533324268742-60b233802eef?w=400&h=300&fit=crop',
     description: 'Mainan edukatif untuk bayi',
     category: 'baby'
   },
   {
-    id: 'b7',
-    name: 'Baby Food Organic',
+    id: 'b6',
+    name: 'Baby Food',
     price: 35000,
-    imageUrl: 'https://www.gerber.com/sites/gerber.com/files/2021-06/gerber-organic-1st-foods-peas.png',
+    imageUrl: 'https://images.unsplash.com/photo-1570913149826-2f1f42b40da6?w=400&h=300&fit=crop',
     description: 'Makanan organik untuk bayi 6m+',
-    category: 'baby'
-  },
-  {
-    id: 'b8',
-    name: 'Baby Carrier',
-    price: 450000,
-    imageUrl: 'https://www.ergobaby.com/wp-content/uploads/2021/08/Omni-Breeze-Front-View.png',
-    description: 'Gendongan bayi ergonomis',
     category: 'baby'
   }
 ];

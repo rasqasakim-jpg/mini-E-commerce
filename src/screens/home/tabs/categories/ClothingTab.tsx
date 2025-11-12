@@ -13,34 +13,50 @@ import { Product } from '../../../../types';
 const clothingProducts: Product[] = [
   {
     id: 'c1',
-    name: 'Nike Air Max 270',
+    name: 'Nike Air Max',
     price: 1899000,
-    imageUrl: 'https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/air-max-270-shoes-WRlPKR.png',
+    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop',
     description: 'Sepatu sneaker dengan cushioning terbaik',
     category: 'clothing'
   },
   {
     id: 'c2',
-    name: 'Uniqlo Ultra Light Down Jacket',
+    name: 'Uniqlo Jacket',
     price: 899000,
-    imageUrl: 'https://image.uniqlo.com/UQ/ST3/AsianCommon/imagesgoods/429069/sub/goods_429069_sub14.jpg',
+    imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=300&fit=crop',
     description: 'Jaket ringan dan hangat untuk segala musim',
     category: 'clothing'
   },
   {
     id: 'c3',
-    name: 'Zara Basic T-Shirt',
+    name: 'Zara T-Shirt',
     price: 299000,
-    imageUrl: 'https://static.zara.net/photos///2023/I/0/1/p/8748/310/250/2/w/750/8748310250_1_1_1.jpg?ts=1693392391285',
+    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop',
     description: 'Kaos basic cotton yang nyaman',
     category: 'clothing'
   },
   {
     id: 'c4',
-    name: 'H&M Slim Fit Jeans',
+    name: 'H&M Jeans',
     price: 499000,
-    imageUrl: 'https://lp2.hm.com/hmgoepprod?set=quality%5B79%5D%2Csource%5B%2F3a%2F54%2F3a54a14c6e12d08619b4d8f94542e4b79b6c6d7c.jpg%5D%2Corigin%5Bdam%5D%2Ccategory%5B%5D%2Ctype%5BLOOKBOOK%5D%2Cres%5Bm%5D%2Chmver%5B1%5D&call=url[file:/product/main]',
+    imageUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=300&fit=crop',
     description: 'Celana jeans slim fit premium',
+    category: 'clothing'
+  },
+  {
+    id: 'c5',
+    name: 'Adidas Hoodie',
+    price: 799000,
+    imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=300&fit=crop',
+    description: 'Hoodie comfortable untuk sehari-hari',
+    category: 'clothing'
+  },
+  {
+    id: 'c6',
+    name: 'Puma Backpack',
+    price: 599000,
+    imageUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop',
+    description: 'Tas ransel stylish dan fungsional',
     category: 'clothing'
   }
 ];

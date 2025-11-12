@@ -216,12 +216,14 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
     marginBottom: 4,
   },
   price: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#007AFF',
+    flexShrink: 1,
   },
   priceDark: {
     color: '#63B3ED',
