@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Product, ProductFormData, ValidationErrors, ValidatableFields } from '../types';
+import { Product, ProductFormData } from '../types';
 import { validateForm, isValidatableField } from '../utils/validation';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -30,15 +30,20 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     price: '',
     imageUrl: '',
     description: '',
+    category: '', 
   });
-  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const { theme } = useTheme();
 
   const handleInputChange = (field: keyof ProductFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing - hanya untuk field yang divalidasi
+    // Clear error when user starts typing
     if (isValidatableField(field) && errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
   };
 
@@ -55,6 +60,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       price: Number(formData.price),
       imageUrl: formData.imageUrl.trim(),
       description: formData.description.trim(),
+      category: formData.category.trim(),
     };
 
     onAddProduct(newProduct);
@@ -67,6 +73,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       price: '',
       imageUrl: '',
       description: '',
+      category: '',
     });
     setErrors({});
     onClose();
@@ -122,7 +129,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   ]}
                   value={formData.price}
                   onChangeText={(value) => handleInputChange('price', value)}
-                  placeholder="Masukkan harga"
+                  placeholder="Masukkan harga (contoh: 100000)"
                   placeholderTextColor={theme === 'dark' ? '#A0AEC0' : '#718096'}
                   keyboardType="numeric"
                 />
@@ -143,11 +150,31 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                   ]}
                   value={formData.imageUrl}
                   onChangeText={(value) => handleInputChange('imageUrl', value)}
-                  placeholder="Masukkan URL gambar"
+                  placeholder="https://example.com/image.jpg"
                   placeholderTextColor={theme === 'dark' ? '#A0AEC0' : '#718096'}
                 />
                 {errors.imageUrl && (
                   <Text style={styles.errorText}>{errors.imageUrl}</Text>
+                )}
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, theme === 'dark' && styles.textDark]}>
+                  Kategori *
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    theme === 'dark' && styles.inputDark,
+                    errors.category && styles.inputError,
+                  ]}
+                  value={formData.category}
+                  onChangeText={(value) => handleInputChange('category', value)}
+                  placeholder="cth: electronics, food, clothing"
+                  placeholderTextColor={theme === 'dark' ? '#A0AEC0' : '#718096'}
+                />
+                {errors.category && (
+                  <Text style={styles.errorText}>{errors.category}</Text>
                 )}
               </View>
 
@@ -160,14 +187,22 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                     styles.input,
                     styles.textArea,
                     theme === 'dark' && styles.inputDark,
+                    errors.description && styles.inputError,
                   ]}
                   value={formData.description}
                   onChangeText={(value) => handleInputChange('description', value)}
-                  placeholder="Masukkan deskripsi produk"
+                  placeholder="Masukkan deskripsi produk (maksimal 500 karakter)"
                   placeholderTextColor={theme === 'dark' ? '#A0AEC0' : '#718096'}
                   multiline
                   numberOfLines={3}
+                  maxLength={500}
                 />
+                {errors.description && (
+                  <Text style={styles.errorText}>{errors.description}</Text>
+                )}
+                <Text style={[styles.charCount, theme === 'dark' && styles.textSecondaryDark]}>
+                  {formData.description.length}/500 karakter
+                </Text>
               </View>
             </ScrollView>
 
@@ -262,6 +297,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
+  charCount: {
+    fontSize: 12,
+    color: '#718096',
+    textAlign: 'right',
+    marginTop: 4,
+  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -299,6 +340,9 @@ const styles = StyleSheet.create({
   },
   textDark: {
     color: '#F7FAFC',
+  },
+  textSecondaryDark: {
+    color: '#A0AEC0',
   },
 });
 

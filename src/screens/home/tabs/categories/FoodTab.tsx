@@ -1,78 +1,102 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  useWindowDimensions,
+} from 'react-native';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import ProductCard from '../../../../components/ProductCard';
+import { Product } from '../../../../types';
+
+const foodProducts: Product[] = [
+  {
+    id: 'f1',
+    name: 'Indomie Goreng Special',
+    price: 3500,
+    imageUrl: 'https://www.indomie.com/uploads/products/indomie-goreng-special-1.png',
+    description: 'Mi instan goreng rasa special',
+    category: 'food',
+    rating: 4.8
+  },
+  {
+    id: 'f2',
+    name: 'Ultra Milk Full Cream',
+    price: 8000,
+    imageUrl: 'https://www.ultramilk.co.id/storage/app/uploads/public/62c/6c8/98c/62c6c898c2d1e991314945.png',
+    description: 'Susu UHT full cream 250ml',
+    category: 'food',
+    rating: 4.5
+  },
+  {
+    id: 'f3',
+    name: 'Kopi Kapal Api Special',
+    price: 15000,
+    imageUrl: 'https://kapalapi.com/wp-content/uploads/2021/06/kape-kapal-api-special-200gr-front-1.png',
+    description: 'Kopi bubuk special 200gr',
+    category: 'food',
+    discount: 10,
+    rating: 4.7
+  },
+  {
+    id: 'f4',
+    name: 'Roti Tawar Sari Roti',
+    price: 18000,
+    imageUrl: 'https://sariroti.com/assets/images/products/roti-tawar-regular.png',
+    description: 'Roti tawar fresh 450gr',
+    category: 'food',
+    rating: 4.3
+  },
+  {
+    id: 'f5',
+    name: 'Chitato Potato Chips',
+    price: 12000,
+    imageUrl: 'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//101/MTA-3518945/chitato_chitato-keju-65gr_full02.jpg',
+    description: 'Keripik kentang rasa keju',
+    category: 'food',
+    discount: 15,
+    rating: 4.6
+  },
+  {
+    id: 'f6',
+    name: 'Aqua Mineral Water',
+    price: 4000,
+    imageUrl: 'https://www.aqua.com/uploads/products/aqua-330ml.png',
+    description: 'Air mineral 600ml',
+    category: 'food',
+    rating: 4.9
+  }
+];
 
 const FoodTab: React.FC = () => {
   const { theme } = useTheme();
+  const { width, height } = useWindowDimensions();
+  
+  const isLandscape = width > height;
+  const numColumns = isLandscape ? 3 : 2;
 
-  const newProducts = [
-    {
-      id: '20',
-      name: 'Nasgor',
-      price: 10000,
-      imageUrl: 'https://i.pinimg.com/1200x/94/82/ab/9482ab2e248d249e7daa7fd6924c8d3b.jpg',
-      description: 'Nasi goreng jawa'
-    },
-     {
-      id: '21',
-      name: 'Spicy korean katsu',
-      price: 25000,
-      imageUrl: 'https://i.pinimg.com/736x/29/57/de/2957de3534a768aa8698b04defe64ebe.jpg',
-      description: 'Spicy korean katsu'
-    },
-       {
-      id: '22',
-      name: 'Mie Goreng',
-      price: 5000,
-      imageUrl: 'https://i.pinimg.com/1200x/74/e6/66/74e66635b6386750a1153937bbacc3ad.jpg',
-      description: 'Mie Goreng kos kos an'
-    },
-      {
-      id: '23',
-      name: 'Nasi padang',
-      price: 20000,
-      imageUrl: 'https://i.pinimg.com/736x/e5/1b/23/e51b23732539afe4a8d84d93e7cd184f.jpg',
-      description: 'Nasi padang lauk ayam'
-    },
-      {
-      id: '24',
-      name: 'Ayam taliwang',
-      price: 30000,
-      imageUrl: 'https://i.pinimg.com/1200x/80/3c/bc/803cbcabba9e4f43b52ea660ac726b90.jpg',
-      description: 'Ayam taliwang bakar tlefon'
-    },
-      {
-      id: '25',
-      name: 'French Fries',
-      price: 399900,
-      imageUrl: 'https://i.pinimg.com/736x/6e/7b/5e/6e7b5e91357a7ce785a75d3449c1ded5.jpg',
-      description: 'Ketang Goreng'
-    },
-       {
-      id: '26',
-      name: 'Pizza',
-      price: 50000,
-      imageUrl: 'https://i.pinimg.com/736x/7e/61/ea/7e61ea809dc9fc0223c6c03e8b877e0b.jpg',
-      description: 'Pizza italiano dfeliciusso'
-    },
-    {
-      id: '27', 
-      name: 'Chocolate Muffin',
-      price: 250000,
-      imageUrl: 'https://i.pinimg.com/736x/60/c1/72/60c1723d8386ed00ce4e4b2ddb23f786.jpg',
-      description: 'Cholotale Muffin mahal'
-    },
-  ];
+  const renderProductItem = ({ item }: { item: Product }) => (
+    <ProductCard product={item} />
+  );
 
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
+      <Text style={[styles.title, theme === 'dark' && styles.textDark]}>
+        🍕 Makanan & Minuman
+      </Text>
+      <Text style={[styles.subtitle, theme === 'dark' && styles.textSecondaryDark]}>
+        Cemilan dan kebutuhan sehari-hari
+      </Text>
+      
       <FlatList
-        data={newProducts}
-        renderItem={({ item }) => <ProductCard product={item} />}
+        data={foodProducts}
+        renderItem={renderProductItem}
         keyExtractor={(item) => item.id}
-        numColumns={2}
+        numColumns={numColumns}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        key={numColumns}
       />
     </View>
   );
@@ -82,13 +106,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F7FAFC',
-    padding: 8,
+    paddingHorizontal: 8,
   },
   containerDark: {
     backgroundColor: '#1A202C',
   },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginVertical: 16,
+    color: '#2D3748',
+  },
+  subtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 16,
+    color: '#718096',
+  },
   listContent: {
     paddingBottom: 20,
+  },
+  textDark: {
+    color: '#F7FAFC',
+  },
+  textSecondaryDark: {
+    color: '#A0AEC0',
   },
 });
 

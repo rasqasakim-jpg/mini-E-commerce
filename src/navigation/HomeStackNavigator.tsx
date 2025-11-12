@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from '../contexts/ThemeContext';
 import HomeTabsNavigator from './HomeTabsNavigator';
 import ProductDetailScreen from '../screens/product/ProductDetailScreen';
+import { TouchableOpacity, Text } from 'react-native';
 
 export type HomeStackParamList = {
   HomeTabs: undefined;
@@ -24,9 +25,11 @@ const HomeStackNavigator: React.FC = () => {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
+        headerTitleAlign: 'center',
         cardStyle: {
           backgroundColor: theme === 'dark' ? '#1A202C' : '#F7FAFC',
         },
+        headerShown: true,
       }}
     >
       <Stack.Screen 
@@ -34,14 +37,31 @@ const HomeStackNavigator: React.FC = () => {
         component={HomeTabsNavigator}
         options={{ 
           title: 'Mini E-Commerce',
+          // ✅ HAPUS hamburger menu, biarkan kosong atau tidak ada headerLeft
+          headerLeft: () => null,
         }}
       />
       <Stack.Screen 
         name="ProductDetail" 
         component={ProductDetailScreen}
-        options={{ 
+        options={({ navigation }) => ({ 
           title: 'Detail Produk',
-        }}
+          headerShown: true,
+          // ✅ TAMBAH tombol back untuk ProductDetail
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ marginLeft: 15, padding: 5 }}
+            >
+              <Text style={{ 
+                fontSize: 20, 
+                color: theme === 'dark' ? '#F7FAFC' : '#2D3748' 
+              }}>
+                ←
+              </Text>
+            </TouchableOpacity>
+          ),
+        })}
       />
     </Stack.Navigator>
   );

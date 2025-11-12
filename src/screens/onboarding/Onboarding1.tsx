@@ -2,19 +2,12 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableOpacity,
-  useWindowDimensions,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useTheme } from '../../contexts/ThemeContext';
-
-type RootStackParamList = {
-  Onboarding1: undefined;
-  Onboarding2: undefined;
-  MainTabs: undefined;
-};
 
 type Onboarding1NavigationProp = StackNavigationProp<RootStackParamList, 'Onboarding1'>;
 
@@ -24,38 +17,47 @@ interface Props {
 
 const Onboarding1: React.FC<Props> = ({ navigation }) => {
   const { theme } = useTheme();
-  const { width } = useWindowDimensions();
+
+  // ✅ SOAL 1: Simulasi Login - Kirim userID ke Root Drawer
+  const handleSimulatedLogin = () => {
+    navigation.navigate('MainApp', { 
+      userId: 'U123' // ✅ Kirim parameter userId
+    });
+  };
+
+  const handleNext = () => {
+    navigation.navigate('Onboarding2');
+  };
 
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
-      <Image
-        source={{ uri: 'https://i.pinimg.com/736x/87/55/16/875516c9da401a6c76812d0e0c0f87e0.jpg' }}
-        style={[styles.image, { width: width * 0.8, height: width * 0.8 }]}
-        resizeMode="cover"
-      />
-      
-      <View style={styles.content}>
-        <Text style={[styles.title, theme === 'dark' && styles.titleDark]}>
-          Selamat Datang di E-Commerce
-        </Text>
-        <Text style={[styles.description, theme === 'dark' && styles.descriptionDark]}>
-          Temukan produk terbaik dengan harga terjangkau dan kualitas terjamin.
-        </Text>
-      </View>
+      <Text style={[styles.title, theme === 'dark' && styles.textDark]}>
+        Selamat Datang!
+      </Text>
+      <Text style={[styles.subtitle, theme === 'dark' && styles.textSecondaryDark]}>
+        Mini E-Commerce App
+      </Text>
 
-      <View style={styles.footer}>
-        <View style={styles.pagination}>
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={[styles.dot, theme === 'dark' && styles.dotDark]} />
-        </View>
-        
-        <TouchableOpacity
-          style={[styles.button, theme === 'dark' && styles.buttonDark]}
-          onPress={() => navigation.navigate('Onboarding2')}
-        >
-          <Text style={styles.buttonText}>Lanjut</Text>
-        </TouchableOpacity>
-      </View>
+      {/* ✅ TAMBAH: Tombol Simulasi Login */}
+      <TouchableOpacity
+        style={[styles.loginButton, theme === 'dark' && styles.loginButtonDark]}
+        onPress={handleSimulatedLogin}
+      >
+        <Text style={styles.loginButtonText}>
+          🔐 Login Simulasi (User: U123)
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, theme === 'dark' && styles.buttonDark]}
+        onPress={handleNext}
+      >
+        <Text style={styles.buttonText}>Lanjut ke Onboarding 2</Text>
+      </TouchableOpacity>
+
+      <Text style={[styles.note, theme === 'dark' && styles.textSecondaryDark]}>
+        ✅ Soal 1: Parameter userId dikirim dari Root ke nested Profile Tab
+      </Text>
     </View>
   );
 };
@@ -64,78 +66,70 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F7FAFC',
+    padding: 20,
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 60,
-    paddingHorizontal: 20,
   },
   containerDark: {
     backgroundColor: '#1A202C',
   },
-  image: {
-    borderRadius: 20,
-    marginTop: 40,
-  },
-  content: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 10,
     color: '#2D3748',
-  },
-  titleDark: {
-    color: '#F7FAFC',
-  },
-  description: {
-    fontSize: 16,
     textAlign: 'center',
-    lineHeight: 24,
+  },
+  subtitle: {
+    fontSize: 16,
     color: '#718096',
+    marginBottom: 40,
+    textAlign: 'center',
   },
-  descriptionDark: {
-    color: '#A0AEC0',
-  },
-  footer: {
-    width: '100%',
+  // ✅ STYLE BARU: Tombol Login Simulasi
+  loginButton: {
+    backgroundColor: '#34C759',
+    padding: 16,
+    borderRadius: 10,
     alignItems: 'center',
+    marginBottom: 16,
+    width: '100%',
   },
-  pagination: {
-    flexDirection: 'row',
-    marginBottom: 30,
+  loginButtonDark: {
+    backgroundColor: '#2E8B57',
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E2E8F0',
-    marginHorizontal: 4,
-  },
-  dotActive: {
-    backgroundColor: '#007AFF',
-    width: 24,
-  },
-  dotDark: {
-    backgroundColor: '#4A5568',
+  loginButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
   },
   button: {
     backgroundColor: '#007AFF',
-    paddingHorizontal: 40,
-    paddingVertical: 16,
-    borderRadius: 12,
-    width: '100%',
+    padding: 16,
+    borderRadius: 10,
     alignItems: 'center',
+    width: '100%',
   },
   buttonDark: {
     backgroundColor: '#3182CE',
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
     fontWeight: '600',
+    fontSize: 16,
+  },
+  note: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 20,
+    fontStyle: 'italic',
+    color: '#718096',
+  },
+  textDark: {
+    color: '#F7FAFC',
+  },
+  textSecondaryDark: {
+    color: '#A0AEC0',
   },
 });
 

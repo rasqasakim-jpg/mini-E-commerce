@@ -1,79 +1,77 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   ScrollView,
-  TouchableOpacity,
-  Alert,
+  useWindowDimensions,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { DrawerParamList } from '../../navigation/DrawerNavigator';
+
+type ProfileScreenRouteProp = RouteProp<DrawerParamList, 'MainApp'>;
 
 const ProfileScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { isAuthenticated, login, logout } = useAuth();
+  const route = useRoute<ProfileScreenRouteProp>();
+  const { width, height } = useWindowDimensions();
+  const [userId, setUserId] = useState<string>('');
 
-  // ✅ SOAL 5: Auth Guard - Tampilkan placeholder jika belum login
-  if (!isAuthenticated) {
-    return (
-      <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
-        <View style={[styles.authPlaceholder, theme === 'dark' && styles.authPlaceholderDark]}>
-          <Text style={[styles.authTitle, theme === 'dark' && styles.textDark]}>
-            🔐 Harap Login
-          </Text>
-          <Text style={[styles.authDescription, theme === 'dark' && styles.textSecondaryDark]}>
-            Anda harus login untuk mengakses halaman profile
-          </Text>
-          <TouchableOpacity
-            style={[styles.loginButton, theme === 'dark' && styles.loginButtonDark]}
-            onPress={() => login('dummy-token-123')}
-          >
-            <Text style={styles.loginButtonText}>📱 Login Sekarang</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
+  // ✅ SOAL 1: Menerima parameter dari Parent Navigator (Drawer)
+  useEffect(() => {
+    const userParam = route.params?.userId;
+    if (userParam) {
+      setUserId(userParam);
+    } else {
+      // Fallback untuk development
+      setUserId('U123');
+    }
+  }, [route.params]);
 
-  // Konten profil asli hanya dimuat jika sudah login
+  const isLandscape = width > height;
+
   return (
     <ScrollView style={[styles.container, theme === 'dark' && styles.containerDark]}>
-      <View style={styles.header}>
-        <Image
-          source={{ uri: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg' }}
-          style={styles.avatar}
-        />
-        <Text style={[styles.name, theme === 'dark' && styles.textDark]}>Defense Irgi Harnoyo</Text>
-        <Text style={[styles.email, theme === 'dark' && styles.textSecondaryDark]}>deffnoy@gmail.com</Text>
-        <Text style={[styles.authStatus, theme === 'dark' && styles.textSecondaryDark]}>
-          Status: ✅ Terautentikasi
+      <View style={[
+        styles.content, 
+        isLandscape && styles.contentLandscape
+      ]}>
+        <Text style={[styles.title, theme === 'dark' && styles.textDark]}>
+          Profile Pengguna
+        </Text>
+        
+        <View style={[styles.infoCard, theme === 'dark' && styles.infoCardDark]}>
+          <Text style={[styles.label, theme === 'dark' && styles.textDark]}>
+            User ID:
+          </Text>
+          <Text style={[styles.value, theme === 'dark' && styles.valueDark]}>
+            {userId || 'Tidak tersedia'}
+          </Text>
+        </View>
+
+        <View style={[styles.infoCard, theme === 'dark' && styles.infoCardDark]}>
+          <Text style={[styles.label, theme === 'dark' && styles.textDark]}>
+            Nama:
+          </Text>
+          <Text style={[styles.value, theme === 'dark' && styles.valueDark]}>
+            Defense Irgi Harnoyo
+          </Text>
+        </View>
+
+        <View style={[styles.infoCard, theme === 'dark' && styles.infoCardDark]}>
+          <Text style={[styles.label, theme === 'dark' && styles.textDark]}>
+            Email:
+          </Text>
+          <Text style={[styles.value, theme === 'dark' && styles.valueDark]}>
+            deffnoy@gmail.com
+          </Text>
+        </View>
+
+        <Text style={[styles.note, theme === 'dark' && styles.textSecondaryDark]}>
+          User ID berhasil diterima dari parameter Root Drawer Navigator
         </Text>
       </View>
-
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>Pengaturan Akun</Text>
-        
-        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>✏️ Edit Profile</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>🔐 Ubah Password</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>🔔 Notifikasi</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.logoutButton, theme === 'dark' && styles.logoutButtonDark]}
-        onPress={logout}
-      >
-        <Text style={styles.logoutButtonText}>🚪 Logout</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -86,115 +84,58 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#1A202C',
   },
-  // Styles untuk auth placeholder
-  authPlaceholder: {
+  content: {
+    padding: 20,
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-    backgroundColor: '#EDF2F7',
-    margin: 20,
-    borderRadius: 12,
   },
-  authPlaceholderDark: {
-    backgroundColor: '#2D3748',
+  contentLandscape: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  authTitle: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 20,
     color: '#2D3748',
     textAlign: 'center',
   },
-  authDescription: {
-    fontSize: 16,
-    color: '#718096',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  loginButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 10,
-  },
-  loginButtonDark: {
-    backgroundColor: '#3182CE',
-  },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  // Styles untuk konten profil
-  header: {
-    alignItems: 'center',
-    padding: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-  },
-  headerDark: {
-    borderBottomColor: '#4A5568',
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 16,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2D3748',
-    marginBottom: 4,
-  },
-  email: {
-    fontSize: 16,
-    color: '#718096',
-    marginBottom: 8,
-  },
-  authStatus: {
-    fontSize: 14,
-    color: '#718096',
-    fontStyle: 'italic',
-  },
-  section: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2D3748',
-    marginBottom: 16,
-  },
-  menuItem: {
+  infoCard: {
     backgroundColor: '#fff',
     padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  menuItemDark: {
+  infoCardDark: {
     backgroundColor: '#2D3748',
+    borderColor: '#4A5568',
+    borderWidth: 1,
   },
-  menuText: {
-    fontSize: 16,
+  label: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  value: {
+    fontSize: 18,
     color: '#2D3748',
+    fontWeight: 'bold',
   },
-  logoutButton: {
-    backgroundColor: '#FF3B30',
-    padding: 16,
-    margin: 16,
-    borderRadius: 10,
-    alignItems: 'center',
+  valueDark: {
+    color: '#F7FAFC',
   },
-  logoutButtonDark: {
-    backgroundColor: '#E53E3E',
-  },
-  logoutButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+  note: {
+    fontSize: 12,
+    color: '#718096',
+    fontStyle: 'italic',
+    marginTop: 20,
+    textAlign: 'center',
   },
   textDark: {
     color: '#F7FAFC',

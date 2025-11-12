@@ -30,11 +30,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const CARD_WIDTH = (width - 48) / 2;
 
-  // ✅ SOAL 2: Navigasi ke Detail Produk
   const handleProductPress = () => {
     console.log('Navigating to product detail:', product.id);
     navigation.navigate('ProductDetail', { productId: product.id });
   };
+
+  // Calculate discounted price
+  const discountedPrice = product.discount 
+    ? product.price * (1 - product.discount / 100)
+    : null;
 
   return (
     <TouchableOpacity 
@@ -52,6 +56,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <ActivityIndicator size="small" color={theme === 'dark' ? '#63B3ED' : '#007AFF'} />
           </View>
         )}
+        
+        {/* Discount Badge */}
+        {product.discount && (
+          <View style={styles.discountBadge}>
+            <Text style={styles.discountText}>-{product.discount}%</Text>
+          </View>
+        )}
+
         <Image
           source={{ 
             uri: imageError 
@@ -71,15 +83,38 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       
       <View style={styles.content}>
         <Text 
+          style={[styles.category, theme === 'dark' && styles.categoryDark]} 
+          numberOfLines={1}
+        >
+          {product.category}
+        </Text>
+        
+        <Text 
           style={[styles.name, theme === 'dark' && styles.nameDark]} 
           numberOfLines={2}
           ellipsizeMode="tail"
         >
           {product.name}
         </Text>
-        <Text style={[styles.price, theme === 'dark' && styles.priceDark]}>
-          Rp {product.price.toLocaleString('id-ID')}
-        </Text>
+
+        {/* Price Section */}
+        <View style={styles.priceContainer}>
+          {discountedPrice ? (
+            <>
+              <Text style={[styles.originalPrice, theme === 'dark' && styles.originalPriceDark]}>
+                Rp {product.price.toLocaleString('id-ID')}
+              </Text>
+              <Text style={[styles.price, theme === 'dark' && styles.priceDark]}>
+                Rp {discountedPrice.toLocaleString('id-ID')}
+              </Text>
+            </>
+          ) : (
+            <Text style={[styles.price, theme === 'dark' && styles.priceDark]}>
+              Rp {product.price.toLocaleString('id-ID')}
+            </Text>
+          )}
+        </View>
+
         <Text 
           style={[styles.description, theme === 'dark' && styles.descriptionDark]} 
           numberOfLines={2}
@@ -87,6 +122,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         >
           {product.description}
         </Text>
+
+        {/* Rating */}
+        {product.rating && (
+          <View style={styles.ratingContainer}>
+            <Text style={styles.ratingStar}>⭐</Text>
+            <Text style={[styles.rating, theme === 'dark' && styles.textSecondaryDark]}>
+              {product.rating}/5
+            </Text>
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -128,10 +173,35 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
+  discountBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#FF3B30',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    zIndex: 1,
+  },
+  discountText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
   content: {
     padding: 12,
     flex: 1,
     justifyContent: 'space-between',
+  },
+  category: {
+    fontSize: 10,
+    color: '#718096',
+    marginBottom: 4,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+  },
+  categoryDark: {
+    color: '#A0AEC0',
   },
   name: {
     fontSize: 14,
@@ -143,14 +213,27 @@ const styles = StyleSheet.create({
   nameDark: {
     color: '#F7FAFC',
   },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   price: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#007AFF',
-    marginBottom: 4,
   },
   priceDark: {
     color: '#63B3ED',
+  },
+  originalPrice: {
+    fontSize: 12,
+    color: '#718096',
+    textDecorationLine: 'line-through',
+    marginRight: 6,
+  },
+  originalPriceDark: {
+    color: '#A0AEC0',
   },
   description: {
     fontSize: 12,
@@ -158,6 +241,22 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   descriptionDark: {
+    color: '#A0AEC0',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  ratingStar: {
+    fontSize: 12,
+    marginRight: 4,
+  },
+  rating: {
+    fontSize: 12,
+    color: '#718096',
+  },
+  textSecondaryDark: {
     color: '#A0AEC0',
   },
 });
