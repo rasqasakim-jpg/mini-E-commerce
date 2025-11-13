@@ -5,20 +5,22 @@ import { useTheme } from '../contexts/ThemeContext';
 import HomeStackNavigator from './HomeStackNavigator';
 import ProductCatalogScreen from '../screens/catalog/ProductCatalogScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import ProductListScreen from '../screens/product/ProductListScreen'; // ✅ IMPORT
+import LoginScreen from '../auth/LoginScreen';
 
+// ✅ UPDATE: Tambah type untuk screen baru
 export type BottomTabParamList = {
   HomeStack: undefined;
+  ProductAPI: undefined; // ✅ Screen ProductList
   Catalog: undefined;
-  Profile: { userId?: string }; // ✅ PROFILE BISA TERIMA userId
+  Profile: { userId?: string };
+  Login: undefined; // ✅ Screen Login
 };
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator: React.FC = () => {
   const { theme } = useTheme();
-  const route = useRoute<RouteProp<BottomTabParamList, 'Profile'>>();
-  const userId = route.params?.userId; // ✅ AMBIL userId dari parameter
 
   return (
     <Tab.Navigator
@@ -46,6 +48,17 @@ const BottomTabNavigator: React.FC = () => {
           ),
         }}
       />
+      {/* ✅ TAMBAH: Screen ProductList di Bottom Tab */}
+      <Tab.Screen 
+        name="ProductAPI" 
+        component={ProductListScreen}
+        options={{
+          title: 'Produk API',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size - 2 }}>🌐</Text>
+          ),
+        }}
+      />
       <Tab.Screen 
         name="Catalog" 
         component={ProductCatalogScreen}
@@ -56,10 +69,20 @@ const BottomTabNavigator: React.FC = () => {
           ),
         }}
       />
+      {/* ✅ TAMBAH: Screen Login di Bottom Tab */}
+      <Tab.Screen 
+        name="Login" 
+        component={LoginScreen}
+        options={{
+          title: 'Login',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size - 2 }}>🔐</Text>
+          ),
+        }}
+      />
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen}
-        initialParams={{ userId }} // ✅ TERUSKAN userId ke ProfileScreen
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => (

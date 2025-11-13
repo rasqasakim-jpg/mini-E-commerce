@@ -47,7 +47,6 @@ const HomeStackNavigator: React.FC = () => {
         options={({ navigation }) => ({ 
           title: 'Detail Produk',
           headerShown: true,
-          // ✅ TAMBAH tombol back untuk ProductDetail
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
