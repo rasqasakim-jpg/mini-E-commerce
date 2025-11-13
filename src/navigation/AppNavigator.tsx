@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from '../contexts/ThemeContext';
+import { AuthProvider } from '../contexts/AuthContext';
 import Onboarding1 from '../screens/onboarding/Onboarding1';
 import Onboarding2 from '../screens/onboarding/Onboarding2';
 import DrawerNavigator from './DrawerNavigator';
@@ -11,7 +12,7 @@ import ScreenHistory from '../screens/analytics/ScreenHistory';
 export type RootStackParamList = {
   Onboarding1: undefined;
   Onboarding2: undefined;
-  MainApp: { userId?: string };
+  MainApp: undefined;
   Checkout: { productId: string };
   ScreenHistory: undefined;
 };
@@ -48,40 +49,42 @@ const AppNavigator: React.FC = () => {
   const { theme } = useTheme();
 
   return (
-    <NavigationContainer 
-      onStateChange={analyticsListener}
-    >
-      <Stack.Navigator 
-        initialRouteName="Onboarding1"
-        screenOptions={{ 
-          headerShown: false,
-          cardStyle: {
-            backgroundColor: theme === 'dark' ? '#1A202C' : '#F7FAFC',
-          }
-        }}
+    <AuthProvider>
+      <NavigationContainer 
+        onStateChange={analyticsListener}
       >
-        <Stack.Screen name="Onboarding1" component={Onboarding1} />
-        <Stack.Screen name="Onboarding2" component={Onboarding2} />
-        <Stack.Screen name="MainApp" component={DrawerNavigator} />
-        <Stack.Screen 
-          name="Checkout" 
-          component={CheckoutScreen}
-          options={{
-            presentation: 'modal',
+        <Stack.Navigator 
+          initialRouteName="Onboarding1"
+          screenOptions={{ 
             headerShown: false,
-            gestureEnabled: true,
+            cardStyle: {
+              backgroundColor: theme === 'dark' ? '#1A202C' : '#F7FAFC',
+            }
           }}
-        />
-        <Stack.Screen 
-          name="ScreenHistory" 
-          component={ScreenHistory}
-          options={{
-            title: 'Riwayat Screen',
-            headerShown: true,
-          }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+        >
+          <Stack.Screen name="Onboarding1" component={Onboarding1} />
+          <Stack.Screen name="Onboarding2" component={Onboarding2} />
+          <Stack.Screen name="MainApp" component={DrawerNavigator} />
+          <Stack.Screen 
+            name="Checkout" 
+            component={CheckoutScreen}
+            options={{
+              presentation: 'modal',
+              headerShown: false,
+              gestureEnabled: true,
+            }}
+          />
+          <Stack.Screen 
+            name="ScreenHistory" 
+            component={ScreenHistory}
+            options={{
+              title: 'Riwayat Screen',
+              headerShown: true,
+            }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AuthProvider>
   );
 };
 
