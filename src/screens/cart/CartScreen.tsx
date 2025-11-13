@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import { useNetInfo } from '../hooks/useNetInfo';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useNetInfo } from '../../hooks/useNetInfo';
 
 // ✅ SOAL 20: Cart dengan Polling Bersyarat
 const CartScreen: React.FC = () => {
