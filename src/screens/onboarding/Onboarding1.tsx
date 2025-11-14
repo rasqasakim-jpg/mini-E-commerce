@@ -31,11 +31,7 @@ const Onboarding1: React.FC<Props> = ({ navigation }) => {
         <View style={styles.circle3}></View>
       </View>
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.logo}>🛍️ MiniCommerce</Text>
-      </View>
-
+      {/* Header */}      
       {/* Main Content */}
       <View style={styles.content}>
         {/* Illustration */}
@@ -148,10 +144,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: 'rgba(52, 199, 89, 0.1)',
   },
-  header: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-  },
   logo: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -166,6 +158,7 @@ const styles = StyleSheet.create({
   illustrationContainer: {
     alignItems: 'center',
     marginBottom: 40,
+    marginTop: 15,
     position: 'relative',
   },
   illustration: {

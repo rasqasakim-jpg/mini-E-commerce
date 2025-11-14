@@ -49,7 +49,6 @@ const HomeTabsNavigator: React.FC = () => {
           width: 'auto',
           paddingHorizontal: 16,
         },
-        // Swipe configuration to prevent conflicts
         swipeEnabled: true,
         animationEnabled: true,
       }}
