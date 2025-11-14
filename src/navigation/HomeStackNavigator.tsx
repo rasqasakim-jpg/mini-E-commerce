@@ -37,7 +37,6 @@ const HomeStackNavigator: React.FC = () => {
         component={HomeTabsNavigator}
         options={{ 
           title: 'Mini E-Commerce',
-          // ✅ HAPUS hamburger menu, biarkan kosong atau tidak ada headerLeft
           headerLeft: () => null,
         }}
       />

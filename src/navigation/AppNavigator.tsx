@@ -2,30 +2,29 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from '../contexts/ThemeContext';
-import { AuthProvider } from '../contexts/AuthContext';
+import ErrorBoundary from '../components/ErrorBoundary';
+import NetworkStatusBanner from '../components/NetworkStatusBanner';
 import Onboarding1 from '../screens/onboarding/Onboarding1';
 import Onboarding2 from '../screens/onboarding/Onboarding2';
-import DrawerNavigator from './DrawerNavigator';
+import BottomTabNavigator from './BottomTabNavigator';
 import CheckoutScreen from '../screens/checkout/CheckoutScreen';
 import ScreenHistory from '../screens/analytics/ScreenHistory';
 
 export type RootStackParamList = {
   Onboarding1: undefined;
   Onboarding2: undefined;
-  MainApp: undefined;
+  MainApp: { userId?: string };
   Checkout: { productId: string };
   ScreenHistory: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-// Analytics simulation function
 const analyticsListener = (state: any) => {
   if (state && state.routes && state.routes.length > 0) {
     const currentRoute = state.routes[state.index];
     let routeName = currentRoute.name;
     
-    // Get nested route name if exists
     if (currentRoute.state) {
       const nestedState = currentRoute.state;
       const nestedRoute = nestedState.routes[nestedState.index];
@@ -34,7 +33,6 @@ const analyticsListener = (state: any) => {
     
     console.log(`[ANALYTICS] Rute dikunjungi: ${routeName}`);
     
-    // Simpan ke screen history (simulasi saja)
     const historyEntry = {
       route: routeName,
       timestamp: new Date().toISOString(),
@@ -49,10 +47,11 @@ const AppNavigator: React.FC = () => {
   const { theme } = useTheme();
 
   return (
-    <AuthProvider>
+    <ErrorBoundary>
       <NavigationContainer 
         onStateChange={analyticsListener}
       >
+        <NetworkStatusBanner />
         <Stack.Navigator 
           initialRouteName="Onboarding1"
           screenOptions={{ 
@@ -64,7 +63,7 @@ const AppNavigator: React.FC = () => {
         >
           <Stack.Screen name="Onboarding1" component={Onboarding1} />
           <Stack.Screen name="Onboarding2" component={Onboarding2} />
-          <Stack.Screen name="MainApp" component={DrawerNavigator} />
+          <Stack.Screen name="MainApp" component={BottomTabNavigator} />
           <Stack.Screen 
             name="Checkout" 
             component={CheckoutScreen}
@@ -84,7 +83,7 @@ const AppNavigator: React.FC = () => {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </AuthProvider>
+    </ErrorBoundary>
   );
 };
 
