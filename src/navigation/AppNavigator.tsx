@@ -6,14 +6,14 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import NetworkStatusBanner from '../components/NetworkStatusBanner';
 import Onboarding1 from '../screens/onboarding/Onboarding1';
 import Onboarding2 from '../screens/onboarding/Onboarding2';
-import BottomTabNavigator from './BottomTabNavigator';
+import DrawerNavigator from './DrawerNavigator'; // Ganti dengan DrawerNavigator
 import CheckoutScreen from '../screens/checkout/CheckoutScreen';
 import ScreenHistory from '../screens/analytics/ScreenHistory';
 
 export type RootStackParamList = {
   Onboarding1: undefined;
   Onboarding2: undefined;
-  MainApp: { userId?: string };
+  MainApp: { userId?: string }; // Ini akan mengarah ke Drawer
   Checkout: { productId: string };
   ScreenHistory: undefined;
 };
@@ -63,7 +63,7 @@ const AppNavigator: React.FC = () => {
         >
           <Stack.Screen name="Onboarding1" component={Onboarding1} />
           <Stack.Screen name="Onboarding2" component={Onboarding2} />
-          <Stack.Screen name="MainApp" component={BottomTabNavigator} />
+          <Stack.Screen name="MainApp" component={DrawerNavigator} />
           <Stack.Screen 
             name="Checkout" 
             component={CheckoutScreen}

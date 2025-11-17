@@ -1,29 +1,26 @@
 import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme } from '../contexts/ThemeContext';
-import PopularTab from '../screens/home/tabs/PopularTab';
-import NewTab from '../screens/home/tabs/NewTab';
-import DiscountTab from '../screens/home/tabs/DiscountTab';
-import ElectronicsTab from '../screens/home/tabs/categories/ElectronicsTab';
-import ClothingTab from '../screens/home/tabs/categories/ClothingTab';
-import FoodTab from '../screens/home/tabs/categories/FoodTab';
-import AutomotiveTab from '../screens/home/tabs/categories/AutomotiveTab';
-import EntertainmentTab from '../screens/home/tabs/categories/EntertainmentTab';
-import BabyTab from '../screens/home/tabs/categories/BabyTab';
+import HomeScreen from '../screens/home/HomeScreen';
+import CategoryProductScreen from './CategoryProductScreen';
 
 export type HomeTabsParamList = {
-  Populer: undefined;
-  Terbaru: undefined;
-  Diskon: undefined;
-  Elektronik: undefined;
-  Pakaian: undefined;
-  Makanan: undefined;
-  Otomotif: undefined;
-  Hiburan: undefined;
-  Bayi: undefined;
+  Beranda: undefined;
+  Elektronik: { category: 'Elektronik' };
+  Pakaian: { category: 'Pakaian' };
+  Makanan: { category: 'Makanan' };
+  Otomotif: { category: 'Otomotif' };
+  Hiburan: { category: 'Hiburan' };
+  Bayi: { category: 'Bayi' };
 };
 
 const Tab = createMaterialTopTabNavigator<HomeTabsParamList>();
+
+// Daftar kategori untuk membuat tab
+const categories = [
+  { name: 'Elektronik' }, { name: 'Pakaian' }, { name: 'Makanan' },
+  { name: 'Otomotif' }, { name: 'Hiburan' }, { name: 'Bayi' }
+] as const; // ✅ Memberitahu TypeScript untuk membaca nilai sebagai literal
 
 const HomeTabsNavigator: React.FC = () => {
   const { theme } = useTheme();
@@ -53,15 +50,21 @@ const HomeTabsNavigator: React.FC = () => {
         animationEnabled: true,
       }}
     >
-      <Tab.Screen name="Populer" component={PopularTab} options={{ tabBarLabel: 'Populer' }} />
-      <Tab.Screen name="Terbaru" component={NewTab} options={{ tabBarLabel: 'Terbaru' }} />
-      <Tab.Screen name="Diskon" component={DiscountTab} options={{ tabBarLabel: 'Diskon' }} />
-      <Tab.Screen name="Elektronik" component={ElectronicsTab} options={{ tabBarLabel: 'Elektronik' }} />
-      <Tab.Screen name="Pakaian" component={ClothingTab} options={{ tabBarLabel: 'Pakaian' }} />
-      <Tab.Screen name="Makanan" component={FoodTab} options={{ tabBarLabel: 'Makanan' }} />
-      <Tab.Screen name="Otomotif" component={AutomotiveTab} options={{ tabBarLabel: 'Otomotif' }} />
-      <Tab.Screen name="Hiburan" component={EntertainmentTab} options={{ tabBarLabel: 'Hiburan' }} />
-      <Tab.Screen name="Bayi" component={BabyTab} options={{ tabBarLabel: 'Perlengkapan Bayi' }} />
+      <Tab.Screen
+       name='Beranda'
+       component={HomeScreen}
+      />
+      {categories.map(category => (
+        <Tab.Screen
+          key={category.name}
+          name={category.name as keyof HomeTabsParamList}
+          component={CategoryProductScreen}
+          initialParams={{ category: category.name }}
+          options={{
+            tabBarLabel: category.name,
+          }}
+        />
+      ))}
     </Tab.Navigator>
   );
 };

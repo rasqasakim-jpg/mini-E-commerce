@@ -1,99 +1,84 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  gender: string;
-  image: string;
-}
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { storageHelpers } from '../utils/storage';
 
 interface AuthContextType {
-  isLoggedIn: boolean;
-  user: User | null;
-  token: string | null;
-  login: (token: string, userData: User) => Promise<void>;
+  isAuthenticated: boolean;
+  user: any | null;
+  login: (token: string, userData: any) => Promise<void>;
   logout: () => Promise<void>;
-  isLoading: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in on app start
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem('userToken');
-        const storedUser = await AsyncStorage.getItem('userData');
-        
-        if (storedToken && storedUser) {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
-          setIsLoggedIn(true);
-        }
-      } catch (error) {
-        console.log('Error checking login status:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
+    checkAuthStatus();
   }, []);
 
-  const login = async (newToken: string, userData: User) => {
+  const checkAuthStatus = async () => {
     try {
-      // Save to AsyncStorage
-      await AsyncStorage.setItem('userToken', newToken);
-      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      setLoading(true);
       
-      // Update state
-      setToken(newToken);
-      setUser(userData);
-      setIsLoggedIn(true);
+      const token = await storageHelpers.getAuthToken();
+      const userData = await storageHelpers.getUserData();
       
-      console.log('✅ Login successful, user:', userData.username);
+      if (token) {
+        setIsAuthenticated(true);
+        setUser(userData);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
+      }
     } catch (error) {
-      console.log('Error saving login data:', error);
+      console.error('Error checking auth status:', error);
+      setIsAuthenticated(false);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (token: string, userData: any) => {
+    try {
+      await storageHelpers.setAuthToken(token);
+      await storageHelpers.setUserData(userData);
+      
+      setIsAuthenticated(true);
+      setUser(userData);
+    } catch (error) {
+      console.error('Error during login:', error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      // Remove from AsyncStorage
-      await AsyncStorage.multiRemove(['userToken', 'userData']);
+      await storageHelpers.removeAuthToken();
+      await storageHelpers.removeUserData();
       
-      // Update state
-      setToken(null);
+      setIsAuthenticated(false);
       setUser(null);
-      setIsLoggedIn(false);
-      
-      console.log('✅ Logout successful');
     } catch (error) {
-      console.log('Error during logout:', error);
+      console.error('Error during logout:', error);
       throw error;
     }
   };
 
+  const value: AuthContextType = {
+    isAuthenticated,
+    user,
+    login,
+    logout,
+    loading,
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      isLoggedIn, 
-      user, 
-      token, 
-      login, 
-      logout, 
-      isLoading 
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

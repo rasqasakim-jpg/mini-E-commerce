@@ -22,7 +22,7 @@ const DrawerNavigator: React.FC = () => {
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} userId={userId} />}
-      screenOptions={({ navigation, route }) => ({
+      screenOptions={({ navigation }) => ({
         drawerStyle: {
           backgroundColor: theme === 'dark' ? '#1A202C' : '#fff',
           width: 320,
@@ -55,7 +55,7 @@ const DrawerNavigator: React.FC = () => {
         component={BottomTabNavigator}
         initialParams={{ userId }}
         options={{ 
-          title: 'Aplikasi Utama',
+          title: 'Aplikasi Belanja',
           headerShown: true,
         }}
       />
@@ -65,7 +65,6 @@ const DrawerNavigator: React.FC = () => {
         options={({ navigation }) => ({ 
           title: 'Pengaturan',
           headerTitle: 'Pengaturan',
-          // ✅ TAMBAH tombol back untuk Settings screen
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
