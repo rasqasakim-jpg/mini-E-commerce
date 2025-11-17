@@ -22,8 +22,10 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
   const { navigation, userId } = props; // ✅ DESTRUCTURE userId dari props
 
   const menuItems = [
-    { label: 'Beranda', icon: '🏠', route: 'MainApp' },
-    { label: 'Settings', icon: '⚙️', route: 'Settings' },
+    { label: 'Beranda', icon: '🏠', screen: 'HomeStack' },
+    { label: 'Profile', icon: '👤', screen: 'Profile' },
+    { label: 'Riwayat Kunjungan', icon: '📊', screen: 'ScreenHistory' },
+    { label: 'Pengaturan', icon: '⚙️', screen: 'Settings' },
   ];
 
   const handleLogout = () => {
@@ -37,8 +39,14 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
     );
   };
 
-  const handleMenuPress = (route: string) => {
-    navigation.navigate(route as any);
+  const handleMenuPress = (screen: string) => {
+    if (screen === 'Settings' || screen === 'ScreenHistory') {
+      // Navigasi ke screen di Root Stack
+      navigation.navigate(screen as any);
+    } else {
+      // Navigasi ke tab di dalam BottomTabNavigator
+      navigation.navigate('MainApp', { screen });
+    }
     navigation.closeDrawer();
   };
 
@@ -72,9 +80,9 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
       <View style={styles.menuContainer}>
         {menuItems.map((item) => (
           <TouchableOpacity
-            key={item.route}
+            key={item.label}
             style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}
-            onPress={() => handleMenuPress(item.route)}
+            onPress={() => handleMenuPress(item.screen)}
           >
             <Text style={styles.menuIcon}>{item.icon}</Text>
             <Text style={[styles.menuLabel, theme === 'dark' && styles.textDark]}>

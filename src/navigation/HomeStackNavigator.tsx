@@ -3,10 +3,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from '../contexts/ThemeContext';
 import HomeTabsNavigator from './HomeTabsNavigator';
 import ProductDetailScreen from '../screens/product/ProductDetailScreen';
+import CategoryProductScreen from './CategoryProductScreen';
 import { TouchableOpacity, Text } from 'react-native';
 
 export type HomeStackParamList = {
   HomeTabs: undefined;
+  CategoryProducts: { category: string };
   ProductDetail: { productId: string };
 };
 
@@ -39,6 +41,11 @@ const HomeStackNavigator: React.FC = () => {
           title: 'Mini E-Commerce',
           headerLeft: () => null,
         }}
+      />
+      <Stack.Screen
+        name="CategoryProducts"
+        component={CategoryProductScreen}
+        options={({ route }: any) => ({ title: route.params.category })}
       />
       <Stack.Screen 
         name="ProductDetail" 
