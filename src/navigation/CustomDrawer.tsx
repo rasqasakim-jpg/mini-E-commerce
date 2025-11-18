@@ -18,7 +18,7 @@ interface CustomDrawerProps extends DrawerContentComponentProps {
 
 const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
   const { theme } = useTheme();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth(); // Ambil data 'user' dari context
   const { navigation, userId } = props; // ✅ DESTRUCTURE userId dari props
 
   const menuItems = [
@@ -50,31 +50,41 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
     navigation.closeDrawer();
   };
 
+  const handleLoginPress = () => {
+    navigation.navigate('MainApp', { screen: 'Login' });
+    navigation.closeDrawer();
+  };
+
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
       
       <View style={[styles.header, theme === 'dark' && styles.headerDark]}>
         <Image
-          source={{ uri: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg' }}
+          source={{ uri: user?.image || '' }}
           style={styles.avatar}
         />
-        <Text style={[styles.userName, theme === 'dark' && styles.textDark]}>
-          Defense Irgi Harnoyo
-        </Text>
-        <Text style={[styles.userEmail, theme === 'dark' && styles.textSecondaryDark]}>
-          deffnoy@gmail.com
-        </Text>
-        
-        {/* ✅ TAMPILKAN userId JIKA ADA */}
-        {userId && (
-          <Text style={[styles.userId, theme === 'dark' && styles.textSecondaryDark]}>
-            User ID: {userId}
-          </Text>
+        {isAuthenticated && user ? (
+          <>
+            <Text style={[styles.userName, theme === 'dark' && styles.textDark]}>
+              {user.firstName} {user.lastName}
+            </Text>
+            <Text style={[styles.userEmail, theme === 'dark' && styles.textSecondaryDark]}>
+              {user.email}
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={[styles.userName, theme === 'dark' && styles.textDark]}>
+              Guest User
+            </Text>
+            <TouchableOpacity onPress={handleLoginPress}>
+              <Text style={styles.loginPrompt}>Login untuk melihat profil</Text>
+            </TouchableOpacity>
+          </>
         )}
-        
         <Text style={[styles.authStatus, theme === 'dark' && styles.textSecondaryDark]}>
           Status: {isAuthenticated ? '✅ Login' : '❌ Logout'}
-        </Text>
+          </Text>
       </View>
 
       <View style={styles.menuContainer}>
@@ -144,6 +154,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#718096',
     marginBottom: 4,
+  },
+  loginPrompt: {
+    fontSize: 14,
+    color: '#007AFF',
+    marginTop: 4,
   },
   // ✅ TAMBAH style untuk userId
   userId: {
