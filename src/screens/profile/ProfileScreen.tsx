@@ -4,171 +4,180 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Image,
+  ScrollView,
   Alert,
 } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ProfileScreen: React.FC = () => {
+  const { isAuthenticated, user, logout } = useAuth();
   const { theme } = useTheme();
-  const { user, logout, isLoggedIn } = useAuth();
 
   const handleLogout = () => {
     Alert.alert(
-      'Konfirmasi Logout',
+      'Logout',
       'Apakah Anda yakin ingin logout?',
       [
         { text: 'Batal', style: 'cancel' },
         { 
           text: 'Logout', 
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              Alert.alert('Berhasil', 'Anda telah logout');
-            } catch (error) {
-              Alert.alert('Error', 'Gagal logout');
-            }
-          }
+          onPress: () => logout()
         },
       ]
     );
   };
 
-  if (!isLoggedIn || !user) {
+  if (!isAuthenticated) {
     return (
       <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
-        <Text style={[styles.errorTitle, theme === 'dark' && styles.textDark]}> {/* ✅ UBAH: title -> errorTitle */}
-          Silakan login terlebih dahulu
-        </Text>
+        <View style={styles.notLoggedIn}>
+          <Text style={[styles.notLoggedInEmoji, theme === 'dark' && styles.textDark]}>
+            🔐
+          </Text>
+          <Text style={[styles.notLoggedInTitle, theme === 'dark' && styles.textDark]}>
+            Belum Login
+          </Text>
+          <Text style={[styles.notLoggedInSubtitle, theme === 'dark' && styles.textSecondaryDark]}>
+            Silakan login untuk melihat profil Anda
+          </Text>
+          <TouchableOpacity style={styles.loginButton}>
+            <Text style={styles.loginButtonText}>Login Sekarang</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
   return (
     <ScrollView style={[styles.container, theme === 'dark' && styles.containerDark]}>
-      <View style={styles.content}>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
-          <Image 
-            source={{ uri: user.image }} 
-            style={styles.profileImage}
-          />
-          <View style={styles.profileInfo}>
-            <Text style={[styles.userName, theme === 'dark' && styles.textDark]}>
-              {user.firstName} {user.lastName}
-            </Text>
-            <Text style={[styles.userEmail, theme === 'dark' && styles.textSecondaryDark]}>
-              {user.email}
-            </Text>
-            <Text style={[styles.userUsername, theme === 'dark' && styles.textSecondaryDark]}>
-              @{user.username}
-            </Text>
-          </View>
-        </View>
+      {/* Header Profile */}
+      <View style={[styles.header, theme === 'dark' && styles.headerDark]}>
+        <Image 
+          source={{ uri: user?.image || 'https://i.pravatar.cc/150' }} 
+          style={styles.avatar}
+        />
+        <Text style={[styles.userName, theme === 'dark' && styles.textDark]}>
+          {user?.firstName} {user?.lastName}
+        </Text>
+        <Text style={[styles.userEmail, theme === 'dark' && styles.textSecondaryDark]}>
+          {user?.email}
+        </Text>
+        <Text style={[styles.userUsername, theme === 'dark' && styles.textSecondaryDark]}>
+          @{user?.username}
+        </Text>
+      </View>
 
-        {/* Stats */}
-        <View style={[styles.statsCard, theme === 'dark' && styles.statsCardDark]}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>12</Text>
-            <Text style={[styles.statLabel, theme === 'dark' && styles.textSecondaryDark]}>
-              Pesanan
-            </Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>8</Text>
-            <Text style={[styles.statLabel, theme === 'dark' && styles.textSecondaryDark]}>
-              Favorit
-            </Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>2</Text>
-            <Text style={[styles.statLabel, theme === 'dark' && styles.textSecondaryDark]}>
-              Voucher
-            </Text>
-          </View>
-        </View>
-
-        {/* Menu Items */}
-        <View style={styles.menuSection}>
-          <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
-            Akun Saya
+      {/* Profile Info */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
+          Informasi Profil
+        </Text>
+        
+        <View style={styles.infoItem}>
+          <Text style={[styles.infoLabel, theme === 'dark' && styles.textSecondaryDark]}>
+            User ID:
           </Text>
-          
-          <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-            <Text style={styles.menuIcon}>📦</Text>
-            <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-              Pesanan Saya
-            </Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-            <Text style={styles.menuIcon}>❤️</Text>
-            <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-              Favorit
-            </Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-            <Text style={styles.menuIcon}>🎫</Text>
-            <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-              Voucher Saya
-            </Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-            <Text style={styles.menuIcon}>📍</Text>
-            <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-              Alamat Pengiriman
-            </Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.menuSection}>
-          <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
-            Pengaturan
+          <Text style={[styles.infoValue, theme === 'dark' && styles.textDark]}>
+            {user?.id}
           </Text>
-          
-          <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-            <Text style={styles.menuIcon}>🔔</Text>
-            <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-              Notifikasi
-            </Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-            <Text style={styles.menuIcon}>🛡️</Text>
-            <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-              Privasi & Keamanan
-            </Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
-            <Text style={styles.menuIcon}>ℹ️</Text>
-            <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
-              Bantuan & Support
-            </Text>
-            <Text style={styles.menuArrow}>›</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity 
-          style={[styles.logoutButton, theme === 'dark' && styles.logoutButtonDark]}
+        <View style={styles.infoItem}>
+          <Text style={[styles.infoLabel, theme === 'dark' && styles.textSecondaryDark]}>
+            Nama Lengkap:
+          </Text>
+          <Text style={[styles.infoValue, theme === 'dark' && styles.textDark]}>
+            {user?.firstName} {user?.lastName}
+          </Text>
+        </View>
+
+        <View style={styles.infoItem}>
+          <Text style={[styles.infoLabel, theme === 'dark' && styles.textSecondaryDark]}>
+            Username:
+          </Text>
+          <Text style={[styles.infoValue, theme === 'dark' && styles.textDark]}>
+            @{user?.username}
+          </Text>
+        </View>
+
+        <View style={styles.infoItem}>
+          <Text style={[styles.infoLabel, theme === 'dark' && styles.textSecondaryDark]}>
+            Email:
+          </Text>
+          <Text style={[styles.infoValue, theme === 'dark' && styles.textDark]}>
+            {user?.email}
+          </Text>
+        </View>
+
+        <View style={styles.infoItem}>
+          <Text style={[styles.infoLabel, theme === 'dark' && styles.textSecondaryDark]}>
+            Gender:
+          </Text>
+          <Text style={[styles.infoValue, theme === 'dark' && styles.textDark]}>
+            {user?.gender === 'male' ? 'Laki-laki' : 'Perempuan'}
+          </Text>
+        </View>
+      </View>
+
+      {/* Account Actions */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
+          Akun & Pengaturan
+        </Text>
+
+        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
+          <Text style={styles.menuIcon}>✏️</Text>
+          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
+            Edit Profil
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
+          <Text style={styles.menuIcon}>🔔</Text>
+          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
+            Notifikasi
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
+          <Text style={styles.menuIcon}>🌙</Text>
+          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
+            Tema {theme === 'dark' ? 'Gelap' : 'Terang'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.menuItem, theme === 'dark' && styles.menuItemDark]}>
+          <Text style={styles.menuIcon}>🛡️</Text>
+          <Text style={[styles.menuText, theme === 'dark' && styles.textDark]}>
+            Privasi & Keamanan
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Logout Button */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={styles.logoutButton}
           onPress={handleLogout}
         >
-          <Text style={styles.logoutButtonText}>🚪 Logout</Text>
+          <Text style={styles.logoutIcon}>🚪</Text>
+          <Text style={styles.logoutText}>
+            Logout
+          </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* App Info */}
+      <View style={styles.footer}>
+        <Text style={[styles.footerText, theme === 'dark' && styles.textSecondaryDark]}>
+          MiniCommerce v1.0.0
+        </Text>
+        <Text style={[styles.footerText, theme === 'dark' && styles.textSecondaryDark]}>
+          Developed with ❤️
+        </Text>
       </View>
     </ScrollView>
   );
@@ -182,22 +191,58 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#1A202C',
   },
-  content: {
-    padding: 16,
-  },
-  profileHeader: {
-    flexDirection: 'row',
+  notLoggedIn: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+  },
+  notLoggedInEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  notLoggedInTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2D3748',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  notLoggedInSubtitle: {
+    fontSize: 16,
+    color: '#718096',
+    textAlign: 'center',
     marginBottom: 24,
   },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 16,
+  loginButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
-  profileInfo: {
-    flex: 1,
+  loginButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  header: {
+    backgroundColor: 'white',
+    padding: 24,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  headerDark: {
+    backgroundColor: '#2D3748',
+    borderBottomColor: '#4A5568',
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+    borderWidth: 3,
+    borderColor: '#007AFF',
   },
   userName: {
     fontSize: 24,
@@ -213,98 +258,92 @@ const styles = StyleSheet.create({
   userUsername: {
     fontSize: 14,
     color: '#718096',
+    fontStyle: 'italic',
   },
-  // ✅ TAMBAH: errorTitle style yang missing
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2D3748',
-    textAlign: 'center',
-    marginTop: 40,
-  },
-  statsCard: {
+  section: {
     backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    marginTop: 16,
+    padding: 16,
   },
-  statsCardDark: {
+  sectionDark: {
     backgroundColor: '#2D3748',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#718096',
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: '#E2E8F0',
-  },
-  menuSection: {
-    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#2D3748',
-    marginBottom: 12,
-    paddingHorizontal: 8,
+    marginBottom: 16,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#718096',
+    flex: 1,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#2D3748',
+    fontWeight: '500',
+    flex: 2,
+    textAlign: 'right',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
   },
   menuItemDark: {
     backgroundColor: '#2D3748',
+    borderBottomColor: '#4A5568',
   },
   menuIcon: {
     fontSize: 20,
-    marginRight: 12,
+    marginRight: 16,
     width: 24,
   },
   menuText: {
-    flex: 1,
     fontSize: 16,
     color: '#2D3748',
     fontWeight: '500',
   },
-  menuArrow: {
-    fontSize: 20,
-    color: '#A0AEC0',
-  },
   logoutButton: {
-    backgroundColor: '#FF3B30',
-    padding: 16,
-    borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    justifyContent: 'center',
+    backgroundColor: '#FED7D7',
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 8,
   },
-  logoutButtonDark: {
-    backgroundColor: '#E53E3E',
+  logoutIcon: {
+    fontSize: 18,
+    marginRight: 12,
+    color: '#E53E3E',
   },
-  logoutButtonText: {
-    color: 'white',
+  logoutText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: '#E53E3E',
+    fontWeight: '600',
+  },
+  footer: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#718096',
+    marginBottom: 4,
   },
   textDark: {
     color: '#F7FAFC',
