@@ -119,10 +119,49 @@ export const secureStorageHelpers = {
   },
 };
 
-export const initializeApiKey = async () => {
-    const existingKey = await secureStorageHelpers.getApiKey();
-    if (!existingKey) {
-        await secureStorageHelpers.setApiKey('default_api_key');
+// ✅ Tambah di bagian bawah file keychain.ts
+export const initializeSecureStorage = async (): Promise<void> => {
+  try {
+    console.log('🔐 Initializing secure storage...');
+    
+    // ✅ Initialize API Key jika belum ada
+    const existingApiKey = await secureStorageHelpers.getApiKey();
+    if (!existingApiKey) {
+      // Simpan API Key statis (dalam production, ini dari environment variables)
+      const secretApiKey = 'MINI_ECOMMERCE_API_KEY_2024_SECRET';
+      await secureStorageHelpers.setApiKey(secretApiKey);
+      console.log('🔐 API Key initialized in Keychain');
+    } else {
+      console.log('🔐 API Key already exists in Keychain');
     }
+    
+    console.log('🎯 Secure storage initialization completed');
+  } catch (error) {
+    console.error('❌ Secure storage initialization failed:', error);
+    throw error;
+  }
+};
 
-}
+// ✅ Tambah debug function
+export const debugKeychain = async () => {
+  try {
+    console.log('🔍 Debugging Keychain...');
+    
+    const authToken = await secureStorageHelpers.getAuthToken();
+    const apiKey = await secureStorageHelpers.getApiKey();
+    
+    console.log('📋 Keychain Status:');
+    console.log('  - Auth Token:', authToken ? '✅ Present' : '❌ Missing');
+    console.log('  - API Key:', apiKey ? '✅ Present' : '❌ Missing');
+    
+    if (!apiKey) {
+      console.log('🔄 Initializing API Key...');
+      await initializeSecureStorage();
+    }
+    
+    return { authToken: !!authToken, apiKey: !!apiKey };
+  } catch (error) {
+    console.error('❌ Keychain debug failed:', error);
+    throw error;
+  }
+};
