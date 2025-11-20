@@ -1,25 +1,44 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigatorScreenParams } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useTheme } from '../contexts/ThemeContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import NetworkStatusBanner from '../components/NetworkStatusBanner';
 import Onboarding1 from '../screens/onboarding/Onboarding1';
 import Onboarding2 from '../screens/onboarding/Onboarding2';
-import DrawerNavigator from './DrawerNavigator'; // Ganti dengan DrawerNavigator
+import BottomTabNavigator from './BottomTabNavigator';
 import CheckoutScreen from '../screens/checkout/CheckoutScreen';
 import ScreenHistory from '../screens/analytics/ScreenHistory';
 
+// ✅ IMPORT BARU: Deep Linking Configuration
+import { linkingConfig } from './linkingConfig';
+
+// ✅ DEFINISI TIPE UNTUK NESTED NAVIGATOR
+export type HomeStackParamList = {
+  Home: undefined;
+  ProductDetail: { productId: string };
+  // Tambahkan screen lain yang mungkin ada di HomeStack
+};
+
+export type BottomTabParamList = {
+  HomeStack: NavigatorScreenParams<HomeStackParamList>; // Tab Home adalah Stack Navigator
+  Profile: { userId?: string }; // Tab Profile bisa menerima userId opsional
+  Cart: undefined; // Tab Keranjang
+  // Tambahkan tab lain yang mungkin ada di BottomTabNavigator
+};
+
+// ✅ PASTIKAN RootStackParamList SESUAI DENGAN SCREEN YANG ADA
 export type RootStackParamList = {
   Onboarding1: undefined;
   Onboarding2: undefined;
-  MainApp: { userId?: string }; // Ini akan mengarah ke Drawer
+  MainApp: NavigatorScreenParams<BottomTabParamList>;  // ✅ Ini adalah BottomTabNavigator
   Checkout: { productId: string };
   ScreenHistory: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
+// ✅ FIXED: analyticsListener function
 const analyticsListener = (state: any) => {
   if (state && state.routes && state.routes.length > 0) {
     const currentRoute = state.routes[state.index];
@@ -50,6 +69,9 @@ const AppNavigator: React.FC = () => {
     <ErrorBoundary>
       <NavigationContainer 
         onStateChange={analyticsListener}
+        // ✅ DEEP LINKING INTEGRATION
+        linking={linkingConfig}
+        fallback={<></>} 
       >
         <NetworkStatusBanner />
         <Stack.Navigator 
@@ -63,7 +85,7 @@ const AppNavigator: React.FC = () => {
         >
           <Stack.Screen name="Onboarding1" component={Onboarding1} />
           <Stack.Screen name="Onboarding2" component={Onboarding2} />
-          <Stack.Screen name="MainApp" component={DrawerNavigator} />
+          <Stack.Screen name="MainApp" component={BottomTabNavigator} />
           <Stack.Screen 
             name="Checkout" 
             component={CheckoutScreen}
