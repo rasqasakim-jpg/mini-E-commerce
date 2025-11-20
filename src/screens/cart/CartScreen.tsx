@@ -1,191 +1,174 @@
-import React from 'react';
+// src/screens/cart/CartScreen.tsx
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
+  StyleSheet,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   Image,
 } from 'react-native';
-import { useStorage } from '../../contexts/StorageContext';
+import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useStorage } from '../../contexts/StorageContext';
+import { useAuth } from '../../contexts/AuthContext'; // Ganti ProtectedRoute dengan useAuth
 import { CartItem } from '../../types/storage';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+
+type CartScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MainApp'>;
+type CartScreenRouteProp = RouteProp<RootStackParamList, 'MainApp'>;
 
 const CartScreen: React.FC = () => {
-  const { cart } = useStorage();
+  const navigation = useNavigation<CartScreenNavigationProp>();
+  const route = useRoute<CartScreenRouteProp>();
   const { theme } = useTheme();
+  const { cart } = useStorage();
+  const { isAuthenticated, loading: authLoading } = useAuth(); // Ambil status autentikasi
 
-  const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
-    if (newQuantity === 0) {
-      // Hapus item jika quantity 0
-      await cart.removeItem(itemId);
-    } else {
-      // Update quantity
-      await cart.updateQuantity(itemId, newQuantity);
+  useEffect(() => {
+    // Jika pengecekan auth selesai dan user tidak terautentikasi, arahkan ke Login
+    if (!authLoading && !isAuthenticated) {
+      Alert.alert(
+        'Wajib Login',
+        'Anda harus login untuk melihat keranjang belanja.',
+        [{ text: 'OK', onPress: () => navigation.navigate('MainApp', { screen: 'Login' }) }]
+      );
     }
-  };
+    // Dependency array memastikan efek ini berjalan saat status auth berubah
+  }, [isAuthenticated, authLoading, navigation]);
 
   const handleCheckout = () => {
-    if (cart.cart.length === 0) {
+    if (cart.itemCount === 0) {
       Alert.alert('Keranjang Kosong', 'Tambahkan produk terlebih dahulu!');
       return;
     }
+    navigation.navigate('Checkout', { source: 'cart' });
+  };
 
+  const handleRemoveItem = (productId: string) => {
     Alert.alert(
-      'Checkout',
-      `Total: Rp ${cart.totalPrice.toLocaleString()}\n\nLanjutkan ke pembayaran?`,
+      'Hapus Produk',
+      'Apakah Anda yakin ingin menghapus produk ini dari keranjang?',
       [
         { text: 'Batal', style: 'cancel' },
         { 
-          text: 'Bayar', 
-          onPress: () => {
-            Alert.alert('Sukses', 'Pesanan berhasil dibuat!');
-            cart.clearCart();
-          }
-        },
+          text: 'Hapus', 
+          style: 'destructive',
+          onPress: () => cart.removeItem(productId) // ✅ FIX 4: Panggil fungsi dari objek cart
+        }
       ]
     );
   };
 
-  const renderCartItem = ({ item }: { item: CartItem }) => (
+  const handleContinueShopping = () => {
+    navigation.navigate('MainApp', { screen: 'HomeStack' });
+  };
+
+  const renderCartItem = ({ item }: { item: CartItem }) => ( // ✅ FIX 6: Gunakan tipe CartItem
     <View style={[styles.cartItem, theme === 'dark' && styles.cartItemDark]}>
-      <Image 
-        source={{ uri: item.image }} 
-        style={styles.productImage}
-        resizeMode="cover"
-      />
-      
-      <View style={styles.productInfo}>
-        <Text style={[styles.productName, theme === 'dark' && styles.textDark]} numberOfLines={2}>
+      <Image source={{ uri: item.image }} style={styles.itemImage} />
+      <View style={styles.itemDetails}>
+        <Text style={[styles.itemName, theme === 'dark' && styles.textDark]}>
           {item.name}
         </Text>
-        <Text style={styles.productPrice}>
-          Rp {item.price.toLocaleString()}
+        <Text style={styles.itemPrice}>
+          Rp {item.price.toLocaleString('id-ID')}
         </Text>
-        
-        <View style={styles.quantityContainer}>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-          >
-            <Text style={styles.quantityButtonText}>-</Text>
-          </TouchableOpacity>
-          
-          <Text style={[styles.quantity, theme === 'dark' && styles.textDark]}>
-            {item.quantity}
-          </Text>
-          
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-          >
-            <Text style={styles.quantityButtonText}>+</Text>
-          </TouchableOpacity>
-        </View>
       </View>
-      
-      <View style={styles.itemTotal}>
-        <Text style={styles.totalPrice}>
-          Rp {(item.price * item.quantity).toLocaleString()}
-        </Text>
-        <TouchableOpacity
-          style={styles.removeButton}
-          onPress={() => cart.removeItem(item.id)}
-        >
-          <Text style={styles.removeButtonText}>Hapus</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity 
+        style={styles.removeButton}
+        onPress={() => handleRemoveItem(item.id)}
+      >
+        <Text style={styles.removeButtonText}>🗑️</Text>
+      </TouchableOpacity>
     </View>
   );
 
-  if (cart.loading) {
+  const renderContent = () => {
+    if (cart.itemCount === 0) { // ✅ FIX 7: Gunakan itemCount untuk pengecekan yang lebih jelas
+      return (
+        <View style={[styles.emptyContainer, theme === 'dark' && styles.containerDark]}>
+          <Text style={[styles.emptyTitle, theme === 'dark' && styles.textDark]}>
+            🛒 Keranjang Kosong
+          </Text>
+          <Text style={[styles.emptyMessage, theme === 'dark' && styles.textSecondaryDark]}>
+            Tambahkan beberapa produk menarik ke keranjang belanja Anda!
+          </Text>
+          <TouchableOpacity 
+            style={styles.shopButton}
+            onPress={handleContinueShopping}
+          >
+            <Text style={styles.shopButtonText}>Mulai Belanja</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    const totalAmount = cart.totalPrice; // ✅ FIX 8: Gunakan totalPrice dari context
+
     return (
       <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
-        <Text style={[styles.loadingText, theme === 'dark' && styles.textDark]}>
-          Memuat keranjang...
-        </Text>
+        <FlatList
+          data={cart.cart}
+          renderItem={renderCartItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
+        
+        <View style={[styles.footer, theme === 'dark' && styles.footerDark]}>
+          <View style={styles.totalContainer}>
+            <Text style={[styles.totalLabel, theme === 'dark' && styles.textDark]}>
+              Total Belanja:
+            </Text>
+            <Text style={styles.totalAmount}>
+              Rp {totalAmount.toLocaleString('id-ID')}
+            </Text>
+          </View>
+          
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={styles.clearButton}
+              onPress={() => {
+                Alert.alert(
+                  'Hapus Semua',
+                  'Apakah Anda yakin ingin menghapus semua item dari keranjang?',
+                  [
+                    { text: 'Batal', style: 'cancel' },
+                    { 
+                      text: 'Hapus Semua', 
+                      style: 'destructive',
+                      onPress: () => cart.clearCart() // ✅ FIX 9: Panggil fungsi dari objek cart
+                    }
+                  ]
+                );
+              }}
+            >
+              <Text style={styles.clearButtonText}>Hapus Semua</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.checkoutButton}
+              onPress={handleCheckout}
+            >
+              <Text style={styles.checkoutButtonText}>Checkout</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
+    );
+  };
+
+  // Selama auth loading atau jika user belum login, tampilkan loading indicator
+  if (authLoading || !isAuthenticated) {
+    return (
+      <View style={[styles.container, styles.emptyContainer, theme === 'dark' && styles.containerDark]} />
     );
   }
 
-  if (cart.cart.length === 0) {
-    return (
-      <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
-        <View style={styles.emptyCart}>
-          <Text style={[styles.emptyCartEmoji, theme === 'dark' && styles.textDark]}>
-            🛒
-          </Text>
-          <Text style={[styles.emptyCartText, theme === 'dark' && styles.textDark]}>
-            Keranjang Belanja Kosong
-          </Text>
-          <Text style={[styles.emptyCartSubtext, theme === 'dark' && styles.textSecondaryDark]}>
-            Yuk tambahkan produk favoritmu!
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
-  return (
-    <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
-      <FlatList
-        data={cart.cart}
-        renderItem={renderCartItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
-      
-      {/* Summary Section */}
-      <View style={[styles.summary, theme === 'dark' && styles.summaryDark]}>
-        <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, theme === 'dark' && styles.textSecondaryDark]}>
-            Total Items:
-          </Text>
-          <Text style={[styles.summaryValue, theme === 'dark' && styles.textDark]}>
-            {cart.itemCount} items
-          </Text>
-        </View>
-        
-        <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, theme === 'dark' && styles.textSecondaryDark]}>
-            Total Harga:
-          </Text>
-          <Text style={styles.total}>
-            Rp {cart.totalPrice.toLocaleString()}
-          </Text>
-        </View>
-        
-        <TouchableOpacity
-          style={styles.checkoutButton}
-          onPress={handleCheckout}
-        >
-          <Text style={styles.checkoutButtonText}>
-            Checkout Sekarang
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={styles.clearButton}
-          onPress={() => {
-            Alert.alert(
-              'Hapus Semua',
-              'Yakin ingin menghapus semua item dari keranjang?',
-              [
-                { text: 'Batal', style: 'cancel' },
-                { text: 'Hapus', onPress: () => cart.clearCart() },
-              ]
-            );
-          }}
-        >
-          <Text style={styles.clearButtonText}>
-            Hapus Semua
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+  return renderContent();
 };
 
 const styles = StyleSheet.create({
@@ -196,33 +179,35 @@ const styles = StyleSheet.create({
   containerDark: {
     backgroundColor: '#1A202C',
   },
-  loadingText: {
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 16,
-    color: '#2D3748',
-  },
-  emptyCart: {
+  emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  emptyCartEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyCartText: {
-    fontSize: 20,
+  emptyTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#2D3748',
-    marginBottom: 8,
-    textAlign: 'center',
+    marginBottom: 12,
   },
-  emptyCartSubtext: {
-    fontSize: 14,
+  emptyMessage: {
+    fontSize: 16,
     color: '#718096',
     textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  shopButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  shopButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   listContent: {
     padding: 16,
@@ -230,141 +215,103 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: 'row',
     backgroundColor: 'white',
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 12,
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowRadius: 2,
+    elevation: 2,
   },
   cartItemDark: {
     backgroundColor: '#2D3748',
   },
-  productImage: {
-    width: 80,
-    height: 80,
+  itemImage: {
+    width: 60,
+    height: 60,
     borderRadius: 8,
+    marginRight: 12,
   },
-  productInfo: {
+  itemDetails: {
     flex: 1,
-    marginLeft: 12,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
-  productName: {
-    fontSize: 14,
+  itemName: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#2D3748',
     marginBottom: 4,
   },
-  productPrice: {
+  itemPrice: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#007AFF',
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityButton: {
-    width: 32,
-    height: 32,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2D3748',
-  },
-  quantity: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2D3748',
-    marginHorizontal: 12,
-    minWidth: 20,
-    textAlign: 'center',
-  },
-  itemTotal: {
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-  },
-  totalPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#007AFF',
+  itemCategory: {
+    fontSize: 12,
+    color: '#718096',
   },
   removeButton: {
-    backgroundColor: '#FED7D7',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    padding: 8,
+    justifyContent: 'center',
   },
   removeButtonText: {
-    fontSize: 12,
-    color: '#E53E3E',
-    fontWeight: '600',
+    fontSize: 18,
   },
-  summary: {
+  footer: {
     backgroundColor: 'white',
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
   },
-  summaryDark: {
+  footerDark: {
     backgroundColor: '#2D3748',
     borderTopColor: '#4A5568',
   },
-  summaryRow: {
+  totalContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  summaryLabel: {
-    fontSize: 14,
-    color: '#718096',
-  },
-  summaryValue: {
-    fontSize: 14,
-    color: '#2D3748',
-    fontWeight: '500',
-  },
-  total: {
+  totalLabel: {
     fontSize: 18,
+    fontWeight: '600',
+    color: '#2D3748',
+  },
+  totalAmount: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#007AFF',
   },
-  checkoutButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  clearButton: {
+    flex: 1,
+    backgroundColor: '#E53E3E',
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 8,
   },
-  checkoutButtonText: {
+  clearButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
-  clearButton: {
-    paddingVertical: 12,
+  checkoutButton: {
+    flex: 2,
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E53E3E',
   },
-  clearButtonText: {
-    color: '#E53E3E',
-    fontSize: 14,
+  checkoutButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontWeight: '600',
   },
   textDark: {

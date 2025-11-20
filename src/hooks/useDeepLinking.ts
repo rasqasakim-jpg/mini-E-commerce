@@ -65,7 +65,7 @@ export const useDeepLinking = () => {
         else if (path.startsWith('checkout/')) {
           const productId = path.replace('checkout/', '');
           if (productId) {
-            navigation.navigate('Checkout', { productId });
+            navigation.navigate('Checkout', { source: 'buy-now', productId });
             console.log('🎯 Navigated to checkout:', productId);
           }
         }

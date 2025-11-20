@@ -3,20 +3,31 @@ import { useAuthToken, useCart, useCache } from '../hooks/useAsyncStorage';
 import { storage } from '../utils/storage';
 import { StorageKeys } from '../types/storage';
 
+import { CartItem } from '../types/storage';
+
 interface StorageContextType {
   // Auth
   authToken: ReturnType<typeof useAuthToken>;
   
   // Cart
-  cart: ReturnType<typeof useCart>;
+  cart: {
+    cart: CartItem[];
+    itemCount: number;
+    totalPrice: number;
+    addItem: (item: CartItem) => Promise<void>;
+    removeItem: (id: string) => Promise<void>;
+    updateQuantity: (id: string, qty: number) => Promise<void>;
+    clearCart: () => Promise<void>;
+    refresh: () => Promise<void>;
+  };
   
   // Cache
   categoriesCache: ReturnType<typeof useCache>;
-  
-  // Multi operations
+
   loadAppData: () => Promise<void>;
   clearAllData: () => Promise<void>;
 }
+
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 

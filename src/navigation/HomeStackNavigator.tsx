@@ -27,20 +27,15 @@ const HomeStackNavigator: React.FC = () => {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        headerTitleAlign: 'center',
         cardStyle: {
           backgroundColor: theme === 'dark' ? '#1A202C' : '#F7FAFC',
         },
-        headerShown: true,
       }}
     >
       <Stack.Screen 
         name="HomeTabs" 
         component={HomeTabsNavigator}
-        options={{ 
-          title: 'Mini E-Commerce',
-          headerLeft: () => null,
-        }}
+        options={{ headerShown: false }} // Sembunyikan header di sini
       />
       <Stack.Screen
         name="CategoryProducts"

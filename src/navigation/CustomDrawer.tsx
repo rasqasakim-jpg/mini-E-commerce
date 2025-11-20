@@ -22,8 +22,8 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
   const { navigation, userId } = props; // ✅ DESTRUCTURE userId dari props
 
   const menuItems = [
-    { label: 'Beranda', icon: '🏠', screen: 'HomeStack' },
-    { label: 'Profile', icon: '👤', screen: 'Profile' },
+    { label: 'Beranda', icon: '🏠', screen: 'HomeStack' }, // Arahkan ke Home di dalam Tab
+    { label: 'Profile', icon: '👤', screen: 'Profile' }, // Arahkan ke Profile di dalam Tab
     { label: 'Riwayat Kunjungan', icon: '📊', screen: 'ScreenHistory' },
     { label: 'Pengaturan', icon: '⚙️', screen: 'Settings' },
   ];

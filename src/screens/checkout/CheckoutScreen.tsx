@@ -1,360 +1,145 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  Platform
-} from 'react-native';
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { api } from '../../utils/apiInterceptor';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useStorage } from '../../contexts/StorageContext';
+import { CartItem } from '../../types/storage';
 
-type RootStackParamList = {
-  Checkout: { productId: string };
-  MainApp: undefined;
-};
+const paymentMethods = [
+  { id: 'va_bca', name: 'BCA Virtual Account', icon: '🏦' },
+  { id: 'ewallet_gopay', name: 'GoPay', icon: '🟢' },
+  { id: 'ewallet_ovo', name: 'OVO', icon: '🟣' },
+  { id: 'cc', name: 'Kartu Kredit/Debit', icon: '💳' },
+  { id: 'cod', name: 'Bayar di Tempat (COD)', icon: '📦' },
+];
 
-type CheckoutScreenRouteProp = RouteProp<RootStackParamList, 'Checkout'>;
-type CheckoutScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
+const CheckoutScreen: React.FC = () => {
+  const navigation = useNavigation();
+  const { theme } = useTheme();
+  const { cart } = useStorage();
+  const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
 
-interface Props {
-  route: CheckoutScreenRouteProp;
-  navigation: CheckoutScreenNavigationProp;
-}
-
-interface CheckoutForm {
-  name: string;
-  email: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  phone: string;
-}
-
-interface FormErrors {
-  name?: string;
-  email?: string;
-  address?: string;
-  city?: string;
-  postalCode?: string;
-  phone?: string;
-}
-
-const CheckoutScreen: React.FC<Props> = ({ route, navigation }) => {
-  const { productId } = route.params;
-  const [form, setForm] = useState<CheckoutForm>({
-    name: '',
-    email: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    phone: ''
-  });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(false);
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-
-  const handleInputChange = (field: keyof CheckoutForm, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const handleInputBlur = (field: keyof CheckoutForm) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
-    validateField(field, form[field]);
-  };
-
-  const validateField = (field: keyof CheckoutForm, value: string): boolean => {
-    const newErrors = { ...errors };
-
-    switch (field) {
-      case 'name':
-        if (!value.trim()) {
-          newErrors.name = 'Nama wajib diisi';
-        } else if (value.trim().length < 2) {
-          newErrors.name = 'Nama minimal 2 karakter';
-        } else {
-          delete newErrors.name;
-        }
-        break;
-
-      case 'email':
-        if (!value.trim()) {
-          newErrors.email = 'Email wajib diisi';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors.email = 'Format email tidak valid';
-        } else {
-          delete newErrors.email;
-        }
-        break;
-
-      case 'address':
-        if (!value.trim()) {
-          newErrors.address = 'Alamat wajib diisi';
-        } else if (value.trim().length < 10) {
-          newErrors.address = 'Alamat terlalu pendek';
-        } else {
-          delete newErrors.address;
-        }
-        break;
-
-      case 'city':
-        if (!value.trim()) {
-          newErrors.city = 'Kota wajib diisi';
-        } else {
-          delete newErrors.city;
-        }
-        break;
-
-      case 'postalCode':
-        if (!value.trim()) {
-          newErrors.postalCode = 'Kode pos wajib diisi';
-        } else if (!/^\d+$/.test(value)) {
-          newErrors.postalCode = 'Kode pos harus angka';
-        } else if (value.length < 5) {
-          newErrors.postalCode = 'Kode pos minimal 5 digit';
-        } else {
-          delete newErrors.postalCode;
-        }
-        break;
-
-      case 'phone':
-        if (!value.trim()) {
-          newErrors.phone = 'Nomor HP wajib diisi';
-        } else if (!/^\d+$/.test(value)) {
-          newErrors.phone = 'Nomor HP harus angka';
-        } else if (value.length < 10) {
-          newErrors.phone = 'Nomor HP minimal 10 digit';
-        } else {
-          delete newErrors.phone;
-        }
-        break;
-    }
-
-    setErrors(newErrors);
-    return !newErrors[field];
-  };
-
-  const validateForm = (): boolean => {
-    const fields: (keyof CheckoutForm)[] = ['name', 'email', 'address', 'city', 'postalCode', 'phone'];
-    let isValid = true;
-
-    fields.forEach(field => {
-      if (!validateField(field, form[field])) {
-        isValid = false;
-      }
-    });
-
-    // Mark all fields as touched to show errors
-    const allTouched = fields.reduce((acc, field) => {
-      acc[field] = true;
-      return acc;
-    }, {} as Record<string, boolean>);
-    
-    setTouched(allTouched);
-
-    return isValid;
-  };
-
-  const handleCheckout = async () => {
-    if (!validateForm()) {
-      Alert.alert('Error', 'Harap perbaiki error pada form sebelum melanjutkan');
+  const handlePlaceOrder = () => {
+    if (!selectedPayment) {
+      Alert.alert('Pilih Pembayaran', 'Anda harus memilih metode pembayaran terlebih dahulu.');
       return;
     }
 
-    setLoading(true);
-
-    try {
-      // Simulate API call
-      const checkoutData = {
-        productId,
-        ...form,
-        timestamp: new Date().toISOString()
-      };
-
-      const response = await api.post('/checkout', checkoutData);
-      
-      if (response.status === 200 || response.status === 201) {
-        Alert.alert(
-          'Sukses', 
-          'Pesanan berhasil dibuat! Anda akan menerima email konfirmasi.',
-          [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('MainApp')
-            }
-          ]
-        );
-      }
-    } catch (err: any) {
-      console.error('Checkout error:', err);
-      
-      // Handle validation errors from server (400 Bad Request)
-      if (err.response?.status === 400 && err.response.data?.errors) {
-        const serverErrors = err.response.data.errors;
-        setErrors(serverErrors);
-        Alert.alert('Error Validasi', 'Harap periksa kembali data yang Anda masukkan');
-      } else if (err.response?.status === 401) {
-        Alert.alert('Error', 'Sesi telah berakhir, silakan login kembali');
-      } else if (err.response?.status === 500) {
-        Alert.alert('Error', 'Server sedang mengalami masalah, silakan coba lagi nanti');
-      } else {
-        Alert.alert(
-          'Error Jaringan', 
-          'Gagal membuat pesanan. Periksa koneksi internet Anda dan coba lagi.',
-          [{ text: 'Coba Lagi', onPress: handleCheckout }]
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
+    Alert.alert(
+      'Pesanan Berhasil',
+      'Terima kasih telah berbelanja! Pesanan Anda sedang diproses.',
+      [
+        { 
+          text: 'OK', 
+          onPress: () => {
+            cart.clearCart();
+            navigation.navigate('MainApp' as never);
+          }
+        }
+      ]
+    );
   };
 
-  const getInputStyle = (field: keyof CheckoutForm) => {
-    if (errors[field] && touched[field]) {
-      return [styles.input, styles.inputError];
-    }
-    return styles.input;
-  };
+  const totalAmount = cart.totalPrice;
+  const shippingCost = totalAmount > 500000 ? 0 : 15000;
+  const finalAmount = totalAmount + shippingCost;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.title}>Checkout Produk</Text>
-      <Text style={styles.subtitle}>Product ID: {productId}</Text>
+    <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={[styles.title, theme === 'dark' && styles.textDark]}>
+          Checkout
+        </Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Informasi Pengiriman</Text>
-        
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Nama Lengkap *</Text>
-          <TextInput
-            style={getInputStyle('name')}
-            value={form.name}
-            onChangeText={(value) => handleInputChange('name', value)}
-            onBlur={() => handleInputBlur('name')}
-            placeholder="Masukkan nama lengkap"
-            editable={!loading}
-          />
-          {errors.name && touched.name && (
-            <Text style={styles.errorText}>{errors.name}</Text>
-          )}
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Email *</Text>
-          <TextInput
-            style={getInputStyle('email')}
-            value={form.email}
-            onChangeText={(value) => handleInputChange('email', value)}
-            onBlur={() => handleInputBlur('email')}
-            placeholder="masukkan@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!loading}
-          />
-          {errors.email && touched.email && (
-            <Text style={styles.errorText}>{errors.email}</Text>
-          )}
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Nomor HP *</Text>
-          <TextInput
-            style={getInputStyle('phone')}
-            value={form.phone}
-            onChangeText={(value) => handleInputChange('phone', value)}
-            onBlur={() => handleInputBlur('phone')}
-            placeholder="08xxxxxxxxxx"
-            keyboardType="phone-pad"
-            editable={!loading}
-          />
-          {errors.phone && touched.phone && (
-            <Text style={styles.errorText}>{errors.phone}</Text>
-          )}
-        </View>
-
-        <View style={styles.formGroup}>
-          <Text style={styles.label}>Alamat Lengkap *</Text>
-          <TextInput
-            style={[getInputStyle('address'), styles.textArea]}
-            value={form.address}
-            onChangeText={(value) => handleInputChange('address', value)}
-            onBlur={() => handleInputBlur('address')}
-            placeholder="Jl. Nama Jalan No. X, RT/RW, Kelurahan, Kecamatan"
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-            editable={!loading}
-          />
-          {errors.address && touched.address && (
-            <Text style={styles.errorText}>{errors.address}</Text>
-          )}
-        </View>
-
-        <View style={styles.row}>
-          <View style={[styles.formGroup, styles.flex]}>
-            <Text style={styles.label}>Kota *</Text>
-            <TextInput
-              style={getInputStyle('city')}
-              value={form.city}
-              onChangeText={(value) => handleInputChange('city', value)}
-              onBlur={() => handleInputBlur('city')}
-              placeholder="Nama Kota"
-              editable={!loading}
-            />
-            {errors.city && touched.city && (
-              <Text style={styles.errorText}>{errors.city}</Text>
-            )}
+        {/* Shipping Address */}
+        <View style={[styles.section, theme === 'dark' && styles.sectionDark]}>
+          <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
+            Alamat Pengiriman
+          </Text>
+          <View style={styles.addressContainer}>
+            <Text style={[styles.addressName, theme === 'dark' && styles.textDark]}>John Doe</Text>
+            <Text style={[styles.addressDetail, theme === 'dark' && styles.textSecondaryDark]}>
+              (+62) 812-3456-7890
+            </Text>
+            <Text style={[styles.addressDetail, theme === 'dark' && styles.textSecondaryDark]}>
+              Jl. Jenderal Sudirman No. 123, Jakarta Pusat, DKI Jakarta, 10220
+            </Text>
           </View>
+        </View>
 
-          <View style={[styles.formGroup, styles.flex, styles.leftMargin]}>
-            <Text style={styles.label}>Kode Pos *</Text>
-            <TextInput
-              style={getInputStyle('postalCode')}
-              value={form.postalCode}
-              onChangeText={(value) => handleInputChange('postalCode', value)}
-              onBlur={() => handleInputBlur('postalCode')}
-              placeholder="12345"
-              keyboardType="numeric"
-              maxLength={5}
-              editable={!loading}
-            />
-            {errors.postalCode && touched.postalCode && (
-              <Text style={styles.errorText}>{errors.postalCode}</Text>
-            )}
+        {/* Order Items */}
+        <View style={[styles.section, theme === 'dark' && styles.sectionDark]}>
+          <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
+            Produk Dipesan ({cart.itemCount})
+          </Text>
+          {cart.cart.map((item: CartItem) => (
+            <View key={item.id} style={styles.cartItem}>
+              <Image source={{ uri: item.image }} style={styles.itemImage} />
+              <View style={styles.itemDetails}>
+                <Text style={[styles.itemName, theme === 'dark' && styles.textDark]} numberOfLines={1}>{item.name}</Text>
+                <Text style={[styles.itemPrice, theme === 'dark' && styles.textSecondaryDark]}>Rp {item.price.toLocaleString('id-ID')}</Text>
+              </View>
+              <Text style={[styles.itemQuantity, theme === 'dark' && styles.textDark]}>x{item.quantity}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Payment Method */}
+        <View style={[styles.section, theme === 'dark' && styles.sectionDark]}>
+          <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
+            Metode Pembayaran
+          </Text>
+          {paymentMethods.map(method => (
+            <TouchableOpacity
+              key={method.id}
+              style={[
+                styles.paymentMethod,
+                theme === 'dark' && styles.paymentMethodDark,
+                selectedPayment === method.id && styles.paymentMethodSelected
+              ]}
+              onPress={() => setSelectedPayment(method.id)}
+            >
+              <Text style={styles.paymentIcon}>{method.icon}</Text>
+              <Text style={[styles.paymentName, theme === 'dark' && styles.textDark]}>{method.name}</Text>
+              {selectedPayment === method.id && <Text style={styles.checkIcon}>✓</Text>}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+
+      {/* Footer */}
+      <View style={[styles.footer, theme === 'dark' && styles.footerDark]}>
+        {/* Payment Summary */}
+        <View style={styles.paymentSummary}>
+          <View style={styles.summaryRow}>
+            <Text style={[styles.summaryLabel, theme === 'dark' && styles.textSecondaryDark]}>Subtotal</Text>
+            <Text style={[styles.summaryValue, theme === 'dark' && styles.textDark]}>Rp {totalAmount.toLocaleString('id-ID')}</Text>
           </View>
+          <View style={styles.summaryRow}>
+            <Text style={[styles.summaryLabel, theme === 'dark' && styles.textSecondaryDark]}>Pengiriman</Text>
+            <Text style={[styles.summaryValue, theme === 'dark' && styles.textDark]}>
+              {shippingCost === 0 ? 'Gratis' : `Rp ${shippingCost.toLocaleString('id-ID')}`}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.footerActions}>
+          <View>
+            <Text style={[styles.totalLabel, theme === 'dark' && styles.textSecondaryDark]}>Total Bayar</Text>
+            <Text style={styles.totalAmount}>Rp {finalAmount.toLocaleString('id-ID')}</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.placeOrderButton, !selectedPayment && styles.disabledButton]}
+            onPress={handlePlaceOrder}
+            disabled={!selectedPayment}
+          >
+            <Text style={styles.placeOrderText}>Buat Pesanan</Text>
+          </TouchableOpacity>
         </View>
       </View>
-
-      <TouchableOpacity
-        style={[styles.checkoutButton, loading && styles.buttonDisabled]}
-        onPress={handleCheckout}
-        disabled={loading}
-      >
-        {loading ? (
-          <View style={styles.buttonContent}>
-            <ActivityIndicator size="small" color="white" />
-            <Text style={styles.checkoutButtonText}>Memproses...</Text>
-          </View>
-        ) : (
-          <Text style={styles.checkoutButtonText}>
-            Buat Pesanan Sekarang
-          </Text>
-        )}
-      </TouchableOpacity>
-
-      <Text style={styles.note}>
-        * Menandakan field wajib diisi
-      </Text>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -363,118 +148,177 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F7FAFC',
   },
-  contentContainer: {
+  containerDark: {
+    backgroundColor: '#1A202C',
+  },
+  scrollContent: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 200, // Space for the fixed footer
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
     color: '#2D3748',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#718096',
-    textAlign: 'center',
     marginBottom: 24,
+    textAlign: 'center',
   },
   section: {
     backgroundColor: 'white',
-    borderRadius: 12,
     padding: 16,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  sectionDark: {
+    backgroundColor: '#2D3748',
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
+    fontWeight: 'bold',
     color: '#2D3748',
+    marginBottom: 12,
   },
-  formGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 6,
-    color: '#4A5568',
-  },
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 8,
-    padding: 12,
+  addressContainer: {},
+  addressName: {
     fontSize: 16,
+    fontWeight: '600',
     color: '#2D3748',
+    marginBottom: 4,
   },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
+  addressDetail: {
+    fontSize: 14,
+    color: '#718096',
+    lineHeight: 20,
   },
-  inputError: {
-    borderColor: '#E53E3E',
-    backgroundColor: '#FEF5F5',
-  },
-  errorText: {
-    color: '#E53E3E',
-    fontSize: 12,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  row: {
+  cartItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  flex: {
-    flex: 1,
-  },
-  leftMargin: {
-    marginLeft: 12,
-  },
-  checkoutButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
     alignItems: 'center',
     marginBottom: 12,
-    shadowColor: '#007AFF',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  buttonDisabled: {
-    backgroundColor: '#A0AEC0',
-    shadowOpacity: 0,
+  itemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
   },
-  buttonContent: {
+  itemDetails: {
+    flex: 1,
+  },
+  itemName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#2D3748',
+  },
+  itemPrice: {
+    fontSize: 12,
+    color: '#718096',
+  },
+  itemQuantity: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2D3748',
+  },
+  paymentMethod: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 8,
   },
-  checkoutButtonText: {
+  paymentMethodDark: {
+    borderColor: '#4A5568',
+  },
+  paymentMethodSelected: {
+    borderColor: '#007AFF',
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+  },
+  paymentIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  paymentName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  checkIcon: {
+    fontSize: 20,
+    color: '#007AFF',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'white',
+    padding: 16,
+    paddingBottom: 32, // Safe area for home indicator
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  footerDark: {
+    backgroundColor: '#2D3748',
+    borderTopColor: '#4A5568',
+  },
+  paymentSummary: {
+    marginBottom: 12,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  summaryLabel: {
+    fontSize: 16,
+    color: '#4A5568',
+  },
+  summaryValue: {
+    fontSize: 16,
+    color: '#4A5568',
+    fontWeight: '500',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 8,
+  },
+  footerActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  totalLabel: {
+    fontSize: 14,
+    color: '#718096',
+  },
+  totalAmount: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+  placeOrderButton: {
+    flex: 1,
+    marginLeft: 16,
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#A0AEC0',
+  },
+  placeOrderText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
-  note: {
-    fontSize: 12,
-    color: '#718096',
-    textAlign: 'center',
+  textDark: {
+    color: '#F7FAFC',
+  },
+  textSecondaryDark: {
+    color: '#A0AEC0',
   },
 });
 
