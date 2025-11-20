@@ -1,3 +1,5 @@
+// src/types/product.ts
+
 export interface Product {
   id: string;
   name: string;
@@ -9,16 +11,21 @@ export interface Product {
   rating: number;
   reviewCount: number;
   inStock: boolean;
-  tags: string[];
 }
 
 export interface ProductDetail extends Product {
   images: string[];
-  specifications: {
-    key: string;
-    value: string;
-  }[];
+  tags: string[];
+  specifications: Record<string, string>;
   brand: string;
   warranty: string;
   shippingInfo: string;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
 }

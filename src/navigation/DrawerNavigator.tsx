@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import CustomDrawer from './CustomDrawer';
 import BottomTabNavigator from './BottomTabNavigator';
 import SettingsScreen from '../screens/settings/SettingsScreen';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { TouchableOpacity, Text } from 'react-native';
 
 export type DrawerParamList = {
@@ -16,13 +16,25 @@ const Drawer = createDrawerNavigator<DrawerParamList>();
 
 const DrawerNavigator: React.FC = () => {
   const { theme } = useTheme();
-  const route = useRoute<RouteProp<DrawerParamList, 'MainApp'>>();
-  const userId = route.params?.userId;
+  // Mengambil userId dari parameter route RootStack
+  const rootRoute = useRoute<RouteProp<{ MainApp: { userId?: string } }, 'MainApp'>>();
+  const userId = rootRoute.params?.userId;
+
+  // Fungsi untuk mendapatkan judul header secara dinamis dari rute aktif
+  const getHeaderTitle = (route: any) => {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? 'HomeStack';
+    if (routeName.includes('Home')) return 'Mini E-Commerce';
+    if (routeName === 'ProductAPI') return 'Produk API';
+    if (routeName === 'Catalog') return 'Katalog';
+    if (routeName === 'Cart') return 'Keranjang';
+    if (routeName === 'Profile') return 'Profil';
+    return routeName;
+  };
 
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} userId={userId} />}
-      screenOptions={({ navigation }) => ({
+      screenOptions={({ navigation, route }) => ({
         drawerStyle: {
           backgroundColor: theme === 'dark' ? '#1A202C' : '#fff',
           width: 320,
@@ -53,11 +65,11 @@ const DrawerNavigator: React.FC = () => {
       <Drawer.Screen 
         name="MainApp" 
         component={BottomTabNavigator}
-        initialParams={{ userId }}
-        options={{ 
-          title: 'Aplikasi Belanja',
+        initialParams={{ userId: userId }}
+        options={({ route }) => ({
+          title: getHeaderTitle(route),
           headerShown: true,
-        }}
+        })}
       />
       <Drawer.Screen 
         name="Settings" 
