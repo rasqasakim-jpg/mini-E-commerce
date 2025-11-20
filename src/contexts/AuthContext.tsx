@@ -1,6 +1,7 @@
+// src/contexts/AuthContext.tsx - UPDATE
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Alert } from 'react-native';
-import { useSecureStorageContext } from './SecureStorageContext';
+import { useSecureStorageContext } from './SecureStorageContext'; // ✅ IMPORT BARU
 import { storageHelpers } from '../utils/storage';
 import { secureStorageHelpers } from '../utils/keychain';
 
@@ -19,8 +20,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   
-  const { secureStorage } = useSecureStorageContext();
+  const { secureStorage } = useSecureStorageContext(); // ✅ GUNAKAN SECURE STORAGE
 
+  // ✅ SOAL a: Cek token dari Keychain saat app start
   useEffect(() => {
     checkAuthStatus();
   }, []);
@@ -29,10 +31,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setLoading(true);
       
-      // ✅ FIX: Gunakan async calls untuk hybrid storage
+      // ✅ SOAL b: Hybrid Storage - Load dari Keychain dan AsyncStorage paralel
       const [authToken, userData] = await Promise.all([
-        secureStorageHelpers.getAuthToken(), // ✅ Async call ke Keychain
-        storageHelpers.getUserData(), // Async call ke AsyncStorage
+        secureStorageHelpers.getAuthToken(), // ✅ FIX: Panggil fungsi getAuthToken
+        storageHelpers.getUserData(), // Dari AsyncStorage (non-sensitive)
       ]);
       
       if (authToken) {
@@ -46,13 +48,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error: any) {
       console.error('Error checking auth status:', error);
       
-      // Handle Access Denied
+      // ✅ SOAL c: Handle Access Denied
       if (secureStorage.hasAccessDenied) {
         Alert.alert(
           'Login Required',
           'Keamanan perangkat berubah. Silakan login ulang.',
           [{ text: 'OK' }]
         );
+        // Reset state
         setIsAuthenticated(false);
         setUser(null);
       }
@@ -63,7 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (token: string, userData: any) => {
     try {
-      // Simpan token ke Keychain (bukan AsyncStorage)
+      // ✅ SOAL a: Simpan token ke Keychain (bukan AsyncStorage)
       await secureStorage.setToken(token);
       await storageHelpers.setUserData(userData);
       
@@ -77,7 +80,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
-      // Pembersihan data aman - hapus dari Keychain dan AsyncStorage
+      // ✅ SOAL d: Pembersihan data aman - hapus dari Keychain dan AsyncStorage
       await Promise.all([
         secureStorage.clearAll(), // Hapus dari Keychain
         storageHelpers.removeUserData(), // Hapus dari AsyncStorage

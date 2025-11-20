@@ -29,28 +29,6 @@ const LoginScreen: React.FC = () => {
 
     setLoading(true);
 
-    setTimeout(async () => {
-         const mockUserData = {
-      id: Math.random().toString(36).substr(2, 9),
-      username: username,
-      email: `${username}@example.com`,
-      firstName: username.charAt(0).toUpperCase() + username.slice(1),
-      lastName: 'User',
-      gender: 'male',
-      image: 'https://i.pravatar.cc/150?u=' + username,
-     };
-     const mockToken = 'mock_jwt_' + Math.random().toString(36).substr(2, 10);
-      await login(mockToken, mockUserData);
-    
-    Alert.alert(
-      'Login Berhasil! 🎉',
-      `Selamat datang ${mockUserData.firstName}!`,
-      [{ text: 'OK' }]
-    );
-    
-    setLoading(false);
-    }, 1000);
-
     try {
       console.log('🔐 Attempting login...');
       
