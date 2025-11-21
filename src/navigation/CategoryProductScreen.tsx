@@ -9,17 +9,31 @@ import {
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
 import ProductItem from '../components/ProductItem';
-import { ProductDetail } from '../types/product';
+
+// Perbaikan: Definisikan tipe Product yang lebih lengkap sesuai kebutuhan ProductItem
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  image: string; // Diubah dari imageUrl menjadi image agar sesuai dengan ProductItem
+  description: string;
+  category: string;
+  rating: number;
+  reviewCount: number;
+  inStock: boolean;
+  discount?: number;
+}
 
 // Mock data, sama seperti di ProductDetailScreen
-const mockProducts: { [key: string]: ProductDetail } = {
-  '1': { id: '1', name: 'iPhone 14 Pro Max', price: 18999000, originalPrice: 19999000, description: 'iPhone 14 Pro Max...', image: 'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=300&h=300&fit=crop', images: [], category: 'Elektronik', rating: 4.8, reviewCount: 1247, inStock: true, tags: [], specifications: [], brand: 'Apple', warranty: '', shippingInfo: '' },
-  '2': { id: '2', name: 'Nike Air Jordan 1', price: 2499000, originalPrice: 2999000, description: 'Sepatu basket iconic...', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop', images: [], category: 'Pakaian', rating: 4.6, reviewCount: 892, inStock: true, tags: [], specifications: [], brand: 'Nike', warranty: '', shippingInfo: '' },
-  '3': { id: '3', name: 'MacBook Pro M2', price: 27999000, description: 'Laptop profesional...', image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=300&fit=crop', images: [], category: 'Elektronik', rating: 4.9, reviewCount: 567, inStock: false, tags: [], specifications: [], brand: 'Apple', warranty: '', shippingInfo: '' },
-  '4': { id: '4', name: 'Rendang Sapi', price: 50000, description: 'Rendang sapi asli Padang.', image: 'https://images.unsplash.com/photo-1565299585323-151f1a427cc2?w=300&h=300&fit=crop', images: [], category: 'Makanan', rating: 4.9, reviewCount: 2000, inStock: true, tags: [], specifications: [], brand: 'RM Sederhana', warranty: '', shippingInfo: '' },
-  '5': { id: '5', name: 'Helm KYT', price: 450000, description: 'Helm full face.', image: 'https://plus.unsplash.com/premium_photo-1677093957238-3b39a75a4450?w=300&h=300&fit=crop', images: [], category: 'Otomotif', rating: 4.5, reviewCount: 300, inStock: true, tags: [], specifications: [], brand: 'KYT', warranty: '', shippingInfo: '' },
-  '6': { id: '6', name: 'Popok Bayi', price: 75000, description: 'Popok sekali pakai.', image: 'https://images.unsplash.com/photo-1546015229-fee17604283a?w=300&h=300&fit=crop', images: [], category: 'Bayi', rating: 4.7, reviewCount: 500, inStock: true, tags: [], specifications: [], brand: 'MamyPoko', warranty: '', shippingInfo: '' },
-  '7': { id: '7', name: 'PS5 Controller', price: 1250000, description: 'Controller DualSense untuk PS5.', image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=300&h=300&fit=crop', images: [], category: 'Hiburan', rating: 4.8, reviewCount: 800, inStock: true, tags: [], specifications: [], brand: 'Sony', warranty: '', shippingInfo: '' },
+const mockProducts: { [key: string]: Product } = {
+  '1': { id: '1', name: 'iPhone 14 Pro Max', price: 18999000, originalPrice: 19999000, description: 'iPhone 14 Pro Max...', image: 'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=300&h=300&fit=crop', category: 'Elektronik', rating: 4.8, reviewCount: 1247, inStock: true },
+  '2': { id: '2', name: 'Nike Air Jordan 1', price: 2499000, originalPrice: 2999000, description: 'Sepatu basket iconic...', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop', category: 'Pakaian', rating: 4.6, reviewCount: 892, inStock: true },
+  '3': { id: '3', name: 'MacBook Pro M2', price: 27999000, description: 'Laptop profesional...', image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=300&fit=crop', category: 'Elektronik', rating: 4.9, reviewCount: 567, inStock: false },
+  '4': { id: '4', name: 'Rendang Sapi', price: 50000, description: 'Rendang sapi asli Padang.', image: 'https://images.unsplash.com/photo-1565299585323-151f1a427cc2?w=300&h=300&fit=crop', category: 'Makanan', rating: 4.9, reviewCount: 2000, inStock: true },
+  '5': { id: '5', name: 'Helm KYT', price: 450000, description: 'Helm full face.', image: 'https://plus.unsplash.com/premium_photo-1677093957238-3b39a75a4450?w=300&h=300&fit=crop', category: 'Otomotif', rating: 4.5, reviewCount: 300, inStock: true },
+  '6': { id: '6', name: 'Popok Bayi', price: 75000, description: 'Popok sekali pakai.', image: 'https://images.unsplash.com/photo-1546015229-fee17604283a?w=300&h=300&fit=crop', category: 'Bayi', rating: 4.7, reviewCount: 500, inStock: true },
+  '7': { id: '7', name: 'PS5 Controller', price: 1250000, description: 'Controller DualSense untuk PS5.', image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=300&h=300&fit=crop', category: 'Hiburan', rating: 4.8, reviewCount: 800, inStock: true },
 };
 
 type CategoryProductScreenRouteProp = RouteProp<{ params: { category: string } }, 'params'>;

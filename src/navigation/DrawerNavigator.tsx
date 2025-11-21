@@ -24,10 +24,11 @@ const DrawerNavigator: React.FC = () => {
   const getHeaderTitle = (route: any) => {
     const routeName = getFocusedRouteNameFromRoute(route) ?? 'HomeStack';
     if (routeName.includes('Home')) return 'Mini E-Commerce';
-    if (routeName === 'ProductAPI') return 'Produk API';
-    if (routeName === 'Catalog') return 'Katalog';
-    if (routeName === 'Cart') return 'Keranjang';
-    if (routeName === 'Profile') return 'Profil';
+    if (routeName === 'ProductAPI') return 'Aplikasi Utama';
+    if (routeName === 'Catalog') return 'Aplikasi Utama';
+    if (routeName === 'Cart') return 'Aplikasi Utama';
+    if (routeName === 'Profile') return 'Aplikasi Utama';
+    if (routeName === 'Login') return 'Aplikasi Utama';
     return routeName;
   };
 
