@@ -1,5 +1,5 @@
-// src/screens/product/AddProductScreen.tsx
-import React, { useState } from 'react';
+// src/screens/product/AddProductScreen.tsx (FIXED VERSION)
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useImagePicker } from '../../hooks/useImagePicker';
 import ImagePickerModal from '../../components/ImagePickerModal';
 import ProtectedRoute from '../../auth/ProtectedRoute';
+import ImageUploader from '../../components/ImageUploader';
 
 const AddProductScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -23,7 +24,13 @@ const AddProductScreen: React.FC = () => {
   const {
     uploading,
     uploadImages,
+    loadSavedImages,
   } = useImagePicker();
+
+  // Load saved images on component mount
+  useEffect(() => {
+    loadSavedImages();
+  }, []);
 
   const handleImagesSelected = (images: any[]) => {
     setProductImages(images);
@@ -37,7 +44,9 @@ const AddProductScreen: React.FC = () => {
 
     const success = await uploadImages(productImages);
     if (success) {
-      setProductImages([]);
+      // Tidak perlu clear images setelah upload berhasil
+      // Biarkan user melihat hasil upload
+      Alert.alert('Sukses', 'Gambar berhasil diupload!');
     }
   };
 
@@ -53,8 +62,20 @@ const AddProductScreen: React.FC = () => {
         Tambah Produk Baru
       </Text>
 
-      {/* Image Picker Section */}
-      <View style={styles.section}>
+      {/* Product Form Section */}
+      <View style={[styles.section, theme === 'dark' && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
+          Informasi Produk
+        </Text>
+        
+        {/* Informasi produk lainnya bisa ditambahkan di sini */}
+        <Text style={[styles.placeholder, theme === 'dark' && styles.textSecondaryDark]}>
+          Nama produk, deskripsi, harga, dll.
+        </Text>
+      </View>
+
+      {/* Image Upload Section */}
+      <View style={[styles.section, theme === 'dark' && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, theme === 'dark' && styles.textDark]}>
           Foto Produk
         </Text>
@@ -63,12 +84,12 @@ const AddProductScreen: React.FC = () => {
           Maksimal 5 foto (600x600px, kualitas 70%)
         </Text>
 
-        <TouchableOpacity 
-          style={[styles.addButton, theme === 'dark' && styles.addButtonDark]}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.addButtonText}>+ Tambah Foto</Text>
-        </TouchableOpacity>
+        {/* Gunakan ImageUploader component */}
+        <ImageUploader
+          onImagesUploaded={handleImagesSelected}
+          maxImages={5}
+          label="Upload Foto Produk"
+        />
 
         {/* Selected Images Preview */}
         {productImages.length > 0 && (
@@ -100,7 +121,12 @@ const AddProductScreen: React.FC = () => {
               disabled={uploading}
             >
               {uploading ? (
-                <ActivityIndicator color="white" />
+                <View style={styles.uploadingContainer}>
+                  <ActivityIndicator color="white" size="small" />
+                  <Text style={styles.uploadButtonText}>
+                    Mengupload...
+                  </Text>
+                </View>
               ) : (
                 <Text style={styles.uploadButtonText}>
                   📤 Upload {productImages.length} Foto
@@ -169,22 +195,17 @@ const styles = StyleSheet.create({
     color: '#718096',
     marginBottom: 16,
   },
-  addButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  addButtonDark: {
-    backgroundColor: '#2B6CB0',
-  },
-  addButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+  placeholder: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    padding: 20,
   },
   imagesContainer: {
     marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
   },
   imagesCount: {
     fontSize: 14,
@@ -229,6 +250,11 @@ const styles = StyleSheet.create({
   },
   uploadButtonDisabled: {
     backgroundColor: '#A0AEC0',
+  },
+  uploadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   uploadButtonText: {
     color: 'white',
