@@ -1,29 +1,32 @@
+// src/navigation/BottomTabNavigator.tsx
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import { useStorage } from '../contexts/StorageContext'; // ✅ IMPORT UNTUK CART BADGE
+import { useStorage } from '../contexts/StorageContext';
 import HomeStackNavigator from './HomeStackNavigator';
 import ProductCatalogScreen from '../screens/catalog/ProductCatalogScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import ProductListScreen from '../screens/product/ProductListScreen';
 import LoginScreen from '../auth/LoginScreen';
 import CartScreen from '../screens/cart/CartScreen';
+import AddProductScreen from '../screens/product/AddProductScreen'; // ✅ IMPORT
 
 export type BottomTabParamList = {
   HomeStack: undefined;
   ProductAPI: undefined;
   Catalog: undefined;
   Cart: undefined;
-  Profile: undefined;
+  Profile: { userId?: string };
   Login: undefined;
+  AddProduct: undefined; // ✅ TAMBAHKAN DI SINI
 };
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator: React.FC = () => {
   const { theme } = useTheme();
-  const { cart } = useStorage(); // ✅ GUNAKAN CART HOOK
+  const { cart } = useStorage();
 
   return (
     <Tab.Navigator
@@ -31,14 +34,14 @@ const BottomTabNavigator: React.FC = () => {
         tabBarStyle: {
           backgroundColor: theme === 'dark' ? '#2D3748' : '#fff',
           borderTopColor: theme === 'dark' ? '#4A5568' : '#E2E8F0',
-          height: 60, // ✅ OPTIONAL: Tinggi konsisten
+          height: 60,
         },
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: theme === 'dark' ? '#A0AEC0' : '#718096',
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
-          marginBottom: 4, // ✅ OPTIONAL: Spacing better
+          marginBottom: 4,
         },
         headerStyle: {
           backgroundColor: theme === 'dark' ? '#2D3748' : '#fff',
@@ -80,7 +83,17 @@ const BottomTabNavigator: React.FC = () => {
           ),
         }}
       />
-      {/* ✅ CART SCREEN DENGAN BADGE */}
+      {/* ✅ TAMBAHKAN AddProduct TAB */}
+      <Tab.Screen 
+        name="AddProduct" 
+        component={AddProductScreen}
+        options={{
+          title: 'Tambah Produk',
+          tabBarIcon: ({ color, size }) => (
+            <Text style={{ color, fontSize: size - 2 }}>➕</Text>
+          ),
+        }}
+      />
       <Tab.Screen 
         name="Cart" 
         component={CartScreen}
@@ -111,6 +124,7 @@ const BottomTabNavigator: React.FC = () => {
       <Tab.Screen 
         name="Profile" 
         component={ProfileScreen}
+        initialParams={{ userId: undefined }}
         options={{
           title: 'Profil',
           tabBarIcon: ({ color, size }) => (
