@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useStorage } from '../../contexts/StorageContext';
 import { CartItem } from '../../types/storage';
+import PaymentConfirmation from '../../components/PaymentConfirmation'; // ✅ IMPORT BARU
 
 const paymentMethods = [
   { id: 'va_bca', name: 'BCA Virtual Account', icon: '🏦' },
@@ -18,6 +19,7 @@ const CheckoutScreen: React.FC = () => {
   const { theme } = useTheme();
   const { cart } = useStorage();
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false); // ✅ STATE BARU
 
   const handlePlaceOrder = () => {
     if (!selectedPayment) {
@@ -25,9 +27,22 @@ const CheckoutScreen: React.FC = () => {
       return;
     }
 
+    // ✅ TAMPILKAN PAYMENT CONFIRMATION UNTUK METODE YANG BUTUH BIOMETRIK
+    if (selectedPayment === 'cc' || selectedPayment === 'ewallet_gopay' || selectedPayment === 'ewallet_ovo') {
+      setShowPaymentConfirmation(true);
+    } else {
+      // Untuk metode pembayaran lain, langsung proses
+      processPayment();
+    }
+  };
+
+  // ✅ FUNGSI PROSES PEMBAYARAN
+  const processPayment = () => {
+    console.log(`Processing payment with method: ${selectedPayment}`);
+    
     Alert.alert(
       'Pesanan Berhasil',
-      'Terima kasih telah berbelanja! Pesanan Anda sedang diproses.',
+      `Terima kasih telah berbelanja! Pesanan Anda sedang diproses dengan ${getPaymentMethodName(selectedPayment)}.`,
       [
         { 
           text: 'OK', 
@@ -40,9 +55,28 @@ const CheckoutScreen: React.FC = () => {
     );
   };
 
+  // ✅ FUNGSI UNTUK MENDAPATKAN NAMA METODE PEMBAYARAN
+  const getPaymentMethodName = (methodId: string | null) => {
+    const method = paymentMethods.find(m => m.id === methodId);
+    return method ? method.name : 'Metode Pembayaran';
+  };
+
   const totalAmount = cart.totalPrice;
   const shippingCost = totalAmount > 500000 ? 0 : 15000;
   const finalAmount = totalAmount + shippingCost;
+
+  // ✅ JIKA SEDANG MENAMPILKAN KONFIRMASI PEMBAYARAN
+  if (showPaymentConfirmation) {
+    return (
+      <PaymentConfirmation 
+        amount={finalAmount}
+        onSuccess={() => {
+          setShowPaymentConfirmation(false);
+          processPayment();
+        }}
+      />
+    );
+  }
 
   return (
     <View style={[styles.container, theme === 'dark' && styles.containerDark]}>
@@ -105,6 +139,18 @@ const CheckoutScreen: React.FC = () => {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* ✅ INFORMASI BIOMETRIK UNTUK PEMBAYARAN */}
+        {(selectedPayment === 'cc' || selectedPayment === 'ewallet_gopay' || selectedPayment === 'ewallet_ovo') && (
+          <View style={[styles.infoBox, theme === 'dark' && styles.infoBoxDark]}>
+            <Text style={[styles.infoTitle, theme === 'dark' && styles.textDark]}>
+              🔒 Keamanan Tambahan
+            </Text>
+            <Text style={[styles.infoText, theme === 'dark' && styles.textSecondaryDark]}>
+              Pembayaran dengan {getPaymentMethodName(selectedPayment)} memerlukan verifikasi biometrik untuk keamanan.
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Footer */}
@@ -135,7 +181,12 @@ const CheckoutScreen: React.FC = () => {
             onPress={handlePlaceOrder}
             disabled={!selectedPayment}
           >
-            <Text style={styles.placeOrderText}>Buat Pesanan</Text>
+            <Text style={styles.placeOrderText}>
+              {selectedPayment && (selectedPayment === 'cc' || selectedPayment === 'ewallet_gopay' || selectedPayment === 'ewallet_ovo') 
+                ? 'Bayar dengan Biometrik' 
+                : 'Buat Pesanan'
+              }
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -245,6 +296,29 @@ const styles = StyleSheet.create({
   checkIcon: {
     fontSize: 20,
     color: '#007AFF',
+  },
+  // ✅ STYLE BARU UNTUK INFO BOX
+  infoBox: {
+    backgroundColor: '#EDF2F7',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  infoBoxDark: {
+    backgroundColor: '#2D3748',
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#2D3748',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#718096',
+    lineHeight: 20,
   },
   footer: {
     position: 'absolute',

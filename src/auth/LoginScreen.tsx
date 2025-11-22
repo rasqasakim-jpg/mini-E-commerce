@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,9 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../api/apiClient';
+import { isSensorAvailable } from '@sbaiahmed1/react-native-biometrics';
+import * as Keychain from 'react-native-keychain';
+import BiometricLogin from './BiometricLogin';
 
 const LoginScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -20,6 +23,27 @@ const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [showBiometric, setShowBiometric] = useState<boolean>(false);
+  const [biometricAvailable, setBiometricAvailable] = useState<boolean>(false);
+
+  useEffect(() => {
+    checkBiometricSupport();
+  }, []);
+
+  const checkBiometricSupport = async () => {
+    try {
+      const { available } = await isSensorAvailable();
+      setBiometricAvailable(available);
+      
+      // Cek jika ada kredensial tersimpan untuk biometric login
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials && available) {
+        setShowBiometric(true);
+      }
+    } catch (error) {
+      console.log('Biometric check error:', error);
+    }
+  };
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -55,6 +79,11 @@ const LoginScreen: React.FC = () => {
         // Save to auth context
         await login(response.data.token, userData);
         
+        // Simpan ke Keychain untuk biometric login
+        if (biometricAvailable) {
+          await Keychain.setGenericPassword(username, response.data.token);
+        }
+        
         console.log('🔑 Token received:', response.data.token);
         Alert.alert(
           'Login Berhasil! 🎉',
@@ -62,7 +91,7 @@ const LoginScreen: React.FC = () => {
           [{ text: 'OK' }]
         );
       } else {
-        Alert.alert('Login Gagal', 'Token tidak diterima dari server');
+        throw new Error('No token received');
       }
 
     } catch (error: unknown) {
@@ -92,6 +121,11 @@ const LoginScreen: React.FC = () => {
       
       await login(mockToken, mockUserData);
       
+      // Simpan ke Keychain untuk biometric login
+      if (biometricAvailable) {
+        await Keychain.setGenericPassword(username, mockToken);
+      }
+      
       Alert.alert(
         'Login Berhasil! 🎉 (Demo Mode)',
         `Selamat datang ${mockUserData.firstName}!`,
@@ -101,6 +135,14 @@ const LoginScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBiometricLogin = () => {
+    setShowBiometric(true);
+  };
+
+  const handleBackToManual = () => {
+    setShowBiometric(false);
   };
 
   // ✅ TEST FUNCTION UNTUK DEBUG API - FIXED ERROR HANDLING
@@ -117,6 +159,11 @@ const LoginScreen: React.FC = () => {
       Alert.alert('API Test', 'Koneksi API gagal: ' + errorMessage);
     }
   };
+
+  // Tampilkan BiometricLogin jika dipilih
+  if (showBiometric) {
+    return <BiometricLogin />;
+  }
 
   return (
     <ScrollView style={[styles.container, theme === 'dark' && styles.containerDark]}>
@@ -176,10 +223,25 @@ const LoginScreen: React.FC = () => {
             <ActivityIndicator color="white" size="small" />
           ) : (
             <Text style={styles.loginButtonText}>
-              🚀 Login
+              🚀 Login Manual
             </Text>
           )}
         </TouchableOpacity>
+
+        {/* Biometric Login Button */}
+        {biometricAvailable && (
+          <TouchableOpacity
+            style={[
+              styles.biometricButton,
+              theme === 'dark' && styles.biometricButtonDark,
+            ]}
+            onPress={handleBiometricLogin}
+          >
+            <Text style={styles.biometricButtonText}>
+              👆 Login dengan Biometrik
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {/* ✅ TAMBAH TEST BUTTON */}
         <TouchableOpacity
@@ -202,12 +264,17 @@ const LoginScreen: React.FC = () => {
             • Akan langsung login (Demo Mode)
           </Text>
           <Text style={[styles.demoText, theme === 'dark' && styles.textSecondaryDark]}>
-            • Data disimpan di AsyncStorage
+            • Data disimpan aman di Keychain untuk biometrik
           </Text>
+          {biometricAvailable && (
+            <Text style={[styles.demoText, theme === 'dark' && styles.textSecondaryDark]}>
+              • Sensor biometrik tersedia di perangkat Anda
+            </Text>
+          )}
         </View>
 
         <Text style={[styles.debugInfo, theme === 'dark' && styles.textSecondaryDark]}>
-          ✅ Guaranteed Login - Always Works
+          ✅ Hybrid Authentication - Manual + Biometrik
         </Text>
       </View>
     </ScrollView>
@@ -280,7 +347,25 @@ const styles = StyleSheet.create({
   loginButtonDisabled: {
     backgroundColor: '#A0AEC0',
   },
+  biometricButton: {
+    backgroundColor: '#10B981',
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 12,
+    borderWidth: 2,
+    borderColor: '#10B981',
+  },
+  biometricButtonDark: {
+    backgroundColor: '#38A169',
+    borderColor: '#38A169',
+  },
   loginButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  biometricButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 18,
