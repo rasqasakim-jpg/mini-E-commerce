@@ -10,7 +10,7 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import ProductListScreen from '../screens/product/ProductListScreen';
 import LoginScreen from '../auth/LoginScreen';
 import CartScreen from '../screens/cart/CartScreen';
-import AddProductScreen from '../screens/product/AddProductScreen'; // ✅ IMPORT
+import AddProductScreen from '../screens/product/AddProductScreen';
 
 export type BottomTabParamList = {
   HomeStack: undefined;
@@ -83,18 +83,17 @@ const BottomTabNavigator: React.FC = () => {
           ),
         }}
       />
-      {/* ✅ TAMBAHKAN AddProduct TAB */}
-      <Tab.Screen 
-        name="AddProduct" 
-        component={AddProductScreen}
-        options={{
-          title: 'Tambah Produk',
-          tabBarIcon: ({ color, size }) => (
-            <Text style={{ color, fontSize: size - 2 }}>➕</Text>
-          ),
-        }}
+      <Tab.Screen
+       name='AddProduct'
+       component={AddProductScreen}
+       options={{
+        title: 'Tambah Produk',
+        tabBarIcon: ({ color, size }) => (
+          <Text style={{ color, fontSize: size - 2 }}>➕</Text>
+        )
+       }}
       />
-      <Tab.Screen 
+         <Tab.Screen 
         name="Cart" 
         component={CartScreen}
         options={{
