@@ -24,6 +24,7 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
   const menuItems = [
     { label: 'Beranda', icon: '🏠', screen: 'HomeStack' }, // Arahkan ke Home di dalam Tab
     { label: 'Profile', icon: '👤', screen: 'Profile' }, // Arahkan ke Profile di dalam Tab
+    { label: 'Verifikasi KTP', icon: '🆔', screen: 'KTPVerification' },
     { label: 'Riwayat Kunjungan', icon: '📊', screen: 'ScreenHistory' },
     { label: 'Pengaturan', icon: '⚙️', screen: 'Settings' },
   ];
@@ -40,7 +41,7 @@ const CustomDrawer: React.FC<CustomDrawerProps> = (props) => {
   };
 
   const handleMenuPress = (screen: string) => {
-    if (screen === 'Settings' || screen === 'ScreenHistory') {
+    if (screen === 'Settings' || screen === 'ScreenHistory' || screen === 'KTPVerification') {
       // Navigasi ke screen di Root Stack
       navigation.navigate(screen as any);
     } else {

@@ -4,23 +4,23 @@ import { useTheme } from '../contexts/ThemeContext';
 import CustomDrawer from './CustomDrawer';
 import BottomTabNavigator from './BottomTabNavigator';
 import SettingsScreen from '../screens/settings/SettingsScreen';
+import KTPVerificationScreen from '../screens/verification/KTPVerificationScreen'; // ✅ IMPORT BARU
 import { RouteProp, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { TouchableOpacity, Text } from 'react-native';
 
 export type DrawerParamList = {
   MainApp: { userId?: string };
   Settings: undefined;
+  KTPVerification: undefined; // ✅ TAMBAH TYPE BARU
 };
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 
 const DrawerNavigator: React.FC = () => {
   const { theme } = useTheme();
-  // Mengambil userId dari parameter route RootStack
   const rootRoute = useRoute<RouteProp<{ MainApp: { userId?: string } }, 'MainApp'>>();
   const userId = rootRoute.params?.userId;
 
-  // Fungsi untuk mendapatkan judul header secara dinamis dari rute aktif
   const getHeaderTitle = (route: any) => {
     const routeName = getFocusedRouteNameFromRoute(route) ?? 'HomeStack';
     if (routeName.includes('Home')) return 'Mini E-Commerce';
@@ -78,6 +78,28 @@ const DrawerNavigator: React.FC = () => {
         options={({ navigation }) => ({ 
           title: 'Pengaturan',
           headerTitle: 'Pengaturan',
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{ marginLeft: 15, padding: 5 }}
+            >
+              <Text style={{ 
+                fontSize: 20, 
+                color: theme === 'dark' ? '#F7FAFC' : '#2D3748' 
+              }}>
+                ←
+              </Text>
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      {/* ✅ TAMBAH SCREEN BARU UNTUK KTP VERIFICATION */}
+      <Drawer.Screen 
+        name="KTPVerification" 
+        component={KTPVerificationScreen}
+        options={({ navigation }) => ({ 
+          title: 'Verifikasi KTP',
+          headerTitle: 'Verifikasi KTP',
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}

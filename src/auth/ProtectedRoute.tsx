@@ -1,7 +1,7 @@
 // src/auth/ProtectedRoute.tsx
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
-import { useAuth } from '../contexts/AuthContext'; // ✅ FIX: Gunakan useAuth dari AuthContext
+import { useAuth } from '../hooks/useAuth';
 import { useNavigation } from '@react-navigation/native';
 
 interface ProtectedRouteProps {
@@ -13,27 +13,70 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   fallback 
 }) => {
-  const { isAuthenticated } = useAuth(); // isLoading tidak tersedia di context ini
+  const { isAuthenticated, isLoading, checkAuth } = useAuth();
   const navigation = useNavigation();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Jika loading dari context selesai dan user tidak terautentikasi, arahkan ke Login.
-    if (!isAuthenticated) {
+    const verifyAuth = async () => {
+      try {
+        await checkAuth();
+      } catch (error) {
+        console.error('❌ ProtectedRoute: Auth verification failed', error);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    verifyAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (!isChecking && !isLoading && !isAuthenticated) {
       console.log('🔒 ProtectedRoute: Not authenticated, redirecting to login');
       
-      // FIX: Arahkan ke layar Login di dalam MainApp
+      // Redirect ke login screen
       navigation.reset({
         index: 0,
-        routes: [{ name: 'MainApp', params: { screen: 'Login' } } as any],
+        routes: [{ name: 'Login' as never }],
       });
     }
-  }, [isAuthenticated, navigation]);
+  }, [isAuthenticated, isLoading, isChecking, navigation]);
+
+  // Loading state
+  if (isChecking || isLoading) {
+    return (
+      <View style={{ 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        backgroundColor: '#F7FAFC'
+      }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={{ marginTop: 12, color: '#718096' }}>
+          Memverifikasi autentikasi...
+        </Text>
+      </View>
+    );
+  }
 
   // Not authenticated
   if (!isAuthenticated) {
-    // Jika tidak terautentikasi, jangan render apa-apa (atau tampilkan fallback)
-    // karena useEffect akan menangani redirect.
-    return fallback ? <>{fallback}</> : null;
+    return fallback ? (
+      <>{fallback}</>
+    ) : (
+      <View style={{ 
+        flex: 1, 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        backgroundColor: '#F7FAFC'
+      }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={{ marginTop: 12, color: '#718096' }}>
+          Mengarahkan ke login...
+        </Text>
+      </View>
+    );
   }
 
   // Authenticated - render children
