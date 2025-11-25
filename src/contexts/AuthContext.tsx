@@ -1,7 +1,7 @@
-// src/contexts/AuthContext.tsx - UPDATE
+// src/contexts/AuthContext.tsx - FIXED VERSION
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Alert } from 'react-native';
-import { useSecureStorageContext } from './SecureStorageContext'; // ✅ IMPORT BARU
+import { useSecureStorageContext } from './SecureStorageContext';
 import { storageHelpers } from '../utils/storage';
 import { secureStorageHelpers } from '../utils/keychain';
 
@@ -11,6 +11,7 @@ interface AuthContextType {
   login: (token: string, userData: any) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  hasCheckedAuth: boolean; // ✅ BARU: Untuk tahu kalo auth check sudah selesai
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,10 +20,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false); // ✅ BARU
   
-  const { secureStorage } = useSecureStorageContext(); // ✅ GUNAKAN SECURE STORAGE
+  const { secureStorage } = useSecureStorageContext();
 
-  // ✅ SOAL a: Cek token dari Keychain saat app start
   useEffect(() => {
     checkAuthStatus();
   }, []);
@@ -31,47 +32,52 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setLoading(true);
       
-      // ✅ SOAL b: Hybrid Storage - Load dari Keychain dan AsyncStorage paralel
       const [authToken, userData] = await Promise.all([
-        secureStorageHelpers.getAuthToken(), // ✅ FIX: Panggil fungsi getAuthToken
-        storageHelpers.getUserData(), // Dari AsyncStorage (non-sensitive)
+        secureStorageHelpers.getAuthToken(),
+        storageHelpers.getUserData(),
       ]);
       
-      if (authToken) {
+      console.log('🔐 Auth Check Result:', { 
+        hasToken: !!authToken, 
+        hasUserData: !!userData 
+      });
+      
+      if (authToken && userData) {
         setIsAuthenticated(true);
         setUser(userData);
-        console.log('🔐 Auto-login successful from Keychain');
+        console.log('✅ Auto-login from Keychain');
       } else {
         setIsAuthenticated(false);
         setUser(null);
+        console.log('❌ No valid credentials, showing LoginScreen');
       }
     } catch (error: any) {
       console.error('Error checking auth status:', error);
       
-      // ✅ SOAL c: Handle Access Denied
       if (secureStorage.hasAccessDenied) {
         Alert.alert(
           'Login Required',
           'Keamanan perangkat berubah. Silakan login ulang.',
           [{ text: 'OK' }]
         );
-        // Reset state
-        setIsAuthenticated(false);
-        setUser(null);
       }
+      setIsAuthenticated(false);
+      setUser(null);
     } finally {
       setLoading(false);
+      setHasCheckedAuth(true); // ✅ TANDAI BAHWA AUTH CHECK SUDAH SELESAI
     }
   };
 
   const login = async (token: string, userData: any) => {
     try {
-      // ✅ SOAL a: Simpan token ke Keychain (bukan AsyncStorage)
+      console.log('🔐 Saving credentials to Keychain...');
       await secureStorage.setToken(token);
       await storageHelpers.setUserData(userData);
       
       setIsAuthenticated(true);
       setUser(userData);
+      console.log('✅ Login successful - credentials saved');
     } catch (error) {
       console.error('Error during login:', error);
       throw error;
@@ -80,16 +86,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
-      // ✅ SOAL d: Pembersihan data aman - hapus dari Keychain dan AsyncStorage
+      console.log('🔐 Clearing credentials from Keychain...');
       await Promise.all([
-        secureStorage.clearAll(), // Hapus dari Keychain
-        storageHelpers.removeUserData(), // Hapus dari AsyncStorage
+        secureStorage.clearAll(),
+        storageHelpers.removeUserData(),
       ]);
       
       setIsAuthenticated(false);
       setUser(null);
-      
-      console.log('🔐 Logout successful - all secure data cleared');
+      console.log('✅ Logout successful - all data cleared');
     } catch (error) {
       console.error('Error during logout:', error);
       throw error;
@@ -102,6 +107,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     login,
     logout,
     loading,
+    hasCheckedAuth, // ✅ EXPORT HAS CHECKED AUTH
   };
 
   return (

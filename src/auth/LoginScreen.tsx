@@ -12,9 +12,8 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../api/apiClient';
-import { isSensorAvailable } from '@sbaiahmed1/react-native-biometrics';
+import { simplePrompt, isSensorAvailable } from '@sbaiahmed1/react-native-biometrics'; // ✅ IMPORT simplePrompt
 import * as Keychain from 'react-native-keychain';
-import BiometricLogin from './BiometricLogin';
 
 const LoginScreen: React.FC = () => {
   const { theme } = useTheme();
@@ -23,8 +22,8 @@ const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [showBiometric, setShowBiometric] = useState<boolean>(false);
   const [biometricAvailable, setBiometricAvailable] = useState<boolean>(false);
+  const [biometryType, setBiometryType] = useState<string>('');
 
   useEffect(() => {
     checkBiometricSupport();
@@ -32,16 +31,82 @@ const LoginScreen: React.FC = () => {
 
   const checkBiometricSupport = async () => {
     try {
-      const { available } = await isSensorAvailable();
-      setBiometricAvailable(available);
+      const sensorInfo = await isSensorAvailable();
+      setBiometricAvailable(sensorInfo.available);
+      setBiometryType(sensorInfo.biometryType || '');
       
-      // Cek jika ada kredensial tersimpan untuk biometric login
-      const credentials = await Keychain.getGenericPassword();
-      if (credentials && available) {
-        setShowBiometric(true);
-      }
+      console.log('🔐 Biometric Status:', {
+        available: sensorInfo.available,
+        type: sensorInfo.biometryType,
+        error: sensorInfo.error
+      });
     } catch (error) {
       console.log('Biometric check error:', error);
+    }
+  };
+
+  // ✅ FIXED: Handle biometric login langsung di sini
+  const handleBiometricLogin = async () => {
+    if (!biometricAvailable) {
+      Alert.alert('Maaf', 'Sensor biometrik tidak tersedia di perangkat ini');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const promptMessage = getBiometricPromptMessage();
+      const { success, error } = await simplePrompt(promptMessage);
+
+      if (success) {
+        // Jika biometrik sukses, ambil token dari Keychain
+        const credentials = await Keychain.getGenericPassword();
+        if (credentials) {
+          // Gunakan token yang tersimpan untuk login
+          await login(credentials.password, { 
+            firstName: 'User', 
+            lastName: 'Biometric', 
+            email: credentials.username,
+            image: 'https://i.pravatar.cc/150?u=' + credentials.username
+          });
+          Alert.alert('Welcome Back!', `Halo ${credentials.username}, login berhasil!`);
+        } else {
+          Alert.alert('Info', 'Tidak ada data tersimpan. Login manual dulu.');
+        }
+      } else {
+        if (error && (error.includes('Lockout') || error.includes('MAX_ATTEMPTS_EXCEEDED'))) {
+          await Keychain.resetGenericPassword();
+          Alert.alert('Keamanan', 'Terlalu banyak percobaan gagal. Data login telah dihapus.');
+        } else {
+          Alert.alert('Gagal', 'Autentikasi biometrik gagal atau dibatalkan');
+        }
+      }
+    } catch (error) {
+      console.error('Biometric auth error:', error);
+      Alert.alert('Error', 'Terjadi kesalahan pada autentikasi biometrik');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getBiometricPromptMessage = () => {
+    switch (biometryType) {
+      case 'FaceID':
+        return 'Pindai Wajah untuk Masuk';
+      case 'TouchID':
+        return 'Tempelkan Jari untuk Masuk';
+      default:
+        return 'Verifikasi Identitas untuk Login';
+    }
+  };
+
+  const getBiometricButtonText = () => {
+    switch (biometryType) {
+      case 'FaceID':
+        return 'Login dengan Face ID';
+      case 'TouchID':
+        return 'Login dengan Touch ID';
+      default:
+        return 'Login dengan Biometrik';
     }
   };
 
@@ -56,59 +121,11 @@ const LoginScreen: React.FC = () => {
     try {
       console.log('🔐 Attempting login...');
       
-      // ✅ COBA ENDPOINT YANG BERBEDA
-      const response = await apiClient.post('/auth/login', {
-        username: username.trim(),
-        password: password,
-      });
-
-      console.log('✅ Login response:', response.data);
-      
-      if (response.data && response.data.token) {
-        // Transform user data from API response
-        const userData = {
-          id: response.data.id?.toString() || '1',
-          username: response.data.username || username,
-          email: response.data.email || `${username}@example.com`,
-          firstName: response.data.firstName || 'User',
-          lastName: response.data.lastName || 'Test',
-          gender: response.data.gender || 'male',
-          image: response.data.image || 'https://via.placeholder.com/150',
-        };
-
-        // Save to auth context
-        await login(response.data.token, userData);
-        
-        // Simpan ke Keychain untuk biometric login
-        if (biometricAvailable) {
-          await Keychain.setGenericPassword(username, response.data.token);
-        }
-        
-        console.log('🔑 Token received:', response.data.token);
-        Alert.alert(
-          'Login Berhasil! 🎉',
-          `Selamat datang ${userData.firstName}!`,
-          [{ text: 'OK' }]
-        );
-      } else {
-        throw new Error('No token received');
-      }
-
-    } catch (error: unknown) {
-      // ✅ FIX: Type safety for error
-      console.log('❌ Login error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        status: (error as any)?.response?.status,
-        data: (error as any)?.response?.data,
-        code: (error as any)?.code
-      });
-      
-      // ✅ FIXED MOCK LOGIN - PASTI JALAN
+      // Gunakan mock login seperti sebelumnya
       console.log('🔄 Using guaranteed mock login...');
       
-      // Mock successful login - SELALU JALAN
       const mockUserData = {
-        id: Math.random().toString(36).substr(2, 9), // Random ID
+        id: Math.random().toString(36).substr(2, 9),
         username: username,
         email: `${username}@example.com`,
         firstName: username.charAt(0).toUpperCase() + username.slice(1),
@@ -121,31 +138,24 @@ const LoginScreen: React.FC = () => {
       
       await login(mockToken, mockUserData);
       
-      // Simpan ke Keychain untuk biometric login
-      if (biometricAvailable) {
-        await Keychain.setGenericPassword(username, mockToken);
-      }
+      // ✅ SIMPAN KE KEYCHAIN SETELAH LOGIN MANUAL PERTAMA KALI
+      await Keychain.setGenericPassword(username, mockToken);
       
       Alert.alert(
-        'Login Berhasil! 🎉 (Demo Mode)',
+        'Login Berhasil! 🎉',
         `Selamat datang ${mockUserData.firstName}!`,
         [{ text: 'OK' }]
       );
       
+    } catch (error: unknown) {
+      console.log('❌ Login error:', error);
+      Alert.alert('Error', 'Terjadi kesalahan saat login');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBiometricLogin = () => {
-    setShowBiometric(true);
-  };
-
-  const handleBackToManual = () => {
-    setShowBiometric(false);
-  };
-
-  // ✅ TEST FUNCTION UNTUK DEBUG API - FIXED ERROR HANDLING
+  // ✅ TEST FUNCTION
   const testApiConnection = async () => {
     try {
       console.log('🧪 Testing API connection...');
@@ -153,17 +163,22 @@ const LoginScreen: React.FC = () => {
       console.log('✅ API Test Success:', testResponse.status);
       Alert.alert('API Test', 'Koneksi API berhasil!');
     } catch (error: unknown) {
-      // ✅ FIX: Type safety for error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.log('❌ API Test Failed:', errorMessage);
       Alert.alert('API Test', 'Koneksi API gagal: ' + errorMessage);
     }
   };
 
-  // Tampilkan BiometricLogin jika dipilih
-  if (showBiometric) {
-    return <BiometricLogin />;
-  }
+  // ✅ CEK APAKAH ADA CREDENTIALS UNTUK TAMPILKAN TOMBOL BIOMETRIK
+  const [hasCredentials, setHasCredentials] = useState(false);
+
+  useEffect(() => {
+    const checkCredentials = async () => {
+      const credentials = await Keychain.getGenericPassword();
+      setHasCredentials(!!credentials);
+    };
+    checkCredentials();
+  }, []);
 
   return (
     <ScrollView style={[styles.container, theme === 'dark' && styles.containerDark]}>
@@ -174,6 +189,15 @@ const LoginScreen: React.FC = () => {
         <Text style={[styles.subtitle, theme === 'dark' && styles.textSecondaryDark]}>
           Masuk ke akun MiniCommerce Anda
         </Text>
+
+        {/* ✅ TAMPILKAN STATUS BIOMETRIK */}
+        {biometricAvailable && (
+          <View style={[styles.biometricStatus, theme === 'dark' && styles.biometricStatusDark]}>
+            <Text style={[styles.biometricStatusText, theme === 'dark' && styles.textDark]}>
+              ✅ {biometryType} Tersedia
+            </Text>
+          </View>
+        )}
 
         <View style={styles.inputGroup}>
           <Text style={[styles.label, theme === 'dark' && styles.textDark]}>
@@ -210,11 +234,32 @@ const LoginScreen: React.FC = () => {
           />
         </View>
 
+        {/* ✅ TOMBOL BIOMETRIK - TAMPIL JIKA ADA SENSOR DAN SUDAH PERNAH LOGIN */}
+        {biometricAvailable && hasCredentials && (
+          <TouchableOpacity
+            style={[
+              styles.biometricButton,
+              theme === 'dark' && styles.biometricButtonDark,
+              loading && styles.buttonDisabled
+            ]}
+            onPress={handleBiometricLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text style={styles.biometricButtonText}>
+                {biometryType === 'FaceID' ? '📱' : '👆'} {getBiometricButtonText()}
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           style={[
             styles.loginButton,
             theme === 'dark' && styles.loginButtonDark,
-            loading && styles.loginButtonDisabled
+            loading && styles.buttonDisabled
           ]}
           onPress={handleLogin}
           disabled={loading}
@@ -227,21 +272,6 @@ const LoginScreen: React.FC = () => {
             </Text>
           )}
         </TouchableOpacity>
-
-        {/* Biometric Login Button */}
-        {biometricAvailable && (
-          <TouchableOpacity
-            style={[
-              styles.biometricButton,
-              theme === 'dark' && styles.biometricButtonDark,
-            ]}
-            onPress={handleBiometricLogin}
-          >
-            <Text style={styles.biometricButtonText}>
-              👆 Login dengan Biometrik
-            </Text>
-          </TouchableOpacity>
-        )}
 
         {/* ✅ TAMBAH TEST BUTTON */}
         <TouchableOpacity
@@ -258,17 +288,14 @@ const LoginScreen: React.FC = () => {
             Cara Login:
           </Text>
           <Text style={[styles.demoText, theme === 'dark' && styles.textSecondaryDark]}>
-            • Gunakan username/password APA SAJA
+            • Login manual pertama kali untuk menyimpan kredensial
           </Text>
           <Text style={[styles.demoText, theme === 'dark' && styles.textSecondaryDark]}>
-            • Akan langsung login (Demo Mode)
-          </Text>
-          <Text style={[styles.demoText, theme === 'dark' && styles.textSecondaryDark]}>
-            • Data disimpan aman di Keychain untuk biometrik
+            • Setelah itu bisa login dengan {biometryType || 'biometrik'}
           </Text>
           {biometricAvailable && (
             <Text style={[styles.demoText, theme === 'dark' && styles.textSecondaryDark]}>
-              • Sensor biometrik tersedia di perangkat Anda
+              • Sensor {biometryType} terdeteksi di perangkat Anda
             </Text>
           )}
         </View>
@@ -304,7 +331,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#718096',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
+  },
+  // ✅ STYLE BARU UNTUK STATUS BIOMETRIK
+  biometricStatus: {
+    backgroundColor: '#EDF2F7',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  biometricStatusDark: {
+    backgroundColor: '#2D3748',
+  },
+  biometricStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2D3748',
   },
   inputGroup: {
     marginBottom: 20,
@@ -329,12 +372,25 @@ const styles = StyleSheet.create({
     borderColor: '#4A5568',
     color: '#F7FAFC',
   },
+  biometricButton: {
+    backgroundColor: '#10B981',
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#10B981',
+  },
+  biometricButtonDark: {
+    backgroundColor: '#38A169',
+    borderColor: '#38A169',
+  },
   loginButton: {
     backgroundColor: '#007AFF',
     padding: 18,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 20,
+    marginBottom: 12,
     shadowColor: '#007AFF',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -344,21 +400,8 @@ const styles = StyleSheet.create({
   loginButtonDark: {
     backgroundColor: '#3182CE',
   },
-  loginButtonDisabled: {
-    backgroundColor: '#A0AEC0',
-  },
-  biometricButton: {
-    backgroundColor: '#10B981',
-    padding: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 12,
-    borderWidth: 2,
-    borderColor: '#10B981',
-  },
-  biometricButtonDark: {
-    backgroundColor: '#38A169',
-    borderColor: '#38A169',
+  buttonDisabled: {
+    opacity: 0.6,
   },
   loginButtonText: {
     color: 'white',
