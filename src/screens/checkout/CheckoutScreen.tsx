@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Image, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useStorage } from '../../contexts/StorageContext';
 import { CartItem } from '../../types/storage';
-import PaymentConfirmation from '../../components/PaymentConfirmation'; // ✅ IMPORT BARU
+import PaymentConfirmation from '../../components/PaymentConfirmation';
+import { calculateShippingCost } from '../../services/ShippingService'; // ✅ IMPORT BARU
 
 const paymentMethods = [
   { id: 'va_bca', name: 'BCA Virtual Account', icon: '🏦' },
@@ -19,7 +20,28 @@ const CheckoutScreen: React.FC = () => {
   const { theme } = useTheme();
   const { cart } = useStorage();
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
-  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false); // ✅ STATE BARU
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false);
+  const [shippingCost, setShippingCost] = useState<number | null>(null); // ✅ STATE BARU
+  const [loadingShipping, setLoadingShipping] = useState(true); // ✅ STATE BARU
+
+  useEffect(() => {
+    loadShippingCost();
+  }, []);
+
+  // ✅ FUNGSI BARU: LOAD ONGKIR BERDASARKAN LOKASI
+  const loadShippingCost = async () => {
+    setLoadingShipping(true);
+    try {
+      const cost = await calculateShippingCost(cart.totalPrice);
+      setShippingCost(cost);
+    } catch (error) {
+      console.error('Error calculating shipping:', error);
+      // Fallback ke ongkir standar jika error
+      setShippingCost(cart.totalPrice > 500000 ? 0 : 15000);
+    } finally {
+      setLoadingShipping(false);
+    }
+  };
 
   const handlePlaceOrder = () => {
     if (!selectedPayment) {
@@ -62,8 +84,7 @@ const CheckoutScreen: React.FC = () => {
   };
 
   const totalAmount = cart.totalPrice;
-  const shippingCost = totalAmount > 500000 ? 0 : 15000;
-  const finalAmount = totalAmount + shippingCost;
+  const finalAmount = totalAmount + (shippingCost || 0);
 
   // ✅ JIKA SEDANG MENAMPILKAN KONFIRMASI PEMBAYARAN
   if (showPaymentConfirmation) {
@@ -98,6 +119,25 @@ const CheckoutScreen: React.FC = () => {
             <Text style={[styles.addressDetail, theme === 'dark' && styles.textSecondaryDark]}>
               Jl. Jenderal Sudirman No. 123, Jakarta Pusat, DKI Jakarta, 10220
             </Text>
+            
+            {/* ✅ INFORMASI ONGKIR BERDASARKAN LOKASI */}
+            <View style={styles.shippingInfo}>
+              <Text style={[styles.shippingLabel, theme === 'dark' && styles.textSecondaryDark]}>
+                📍 Ongkir dihitung berdasarkan lokasi Anda
+              </Text>
+              {loadingShipping ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="small" color="#007AFF" />
+                  <Text style={[styles.loadingText, theme === 'dark' && styles.textSecondaryDark]}>
+                    Menghitung ongkir...
+                  </Text>
+                </View>
+              ) : (
+                <Text style={[styles.shippingCost, theme === 'dark' && styles.textDark]}>
+                  Biaya pengiriman: {shippingCost === 0 ? 'GRATIS' : `Rp ${shippingCost?.toLocaleString('id-ID')}`}
+                </Text>
+              )}
+            </View>
           </View>
         </View>
 
@@ -163,9 +203,13 @@ const CheckoutScreen: React.FC = () => {
           </View>
           <View style={styles.summaryRow}>
             <Text style={[styles.summaryLabel, theme === 'dark' && styles.textSecondaryDark]}>Pengiriman</Text>
-            <Text style={[styles.summaryValue, theme === 'dark' && styles.textDark]}>
-              {shippingCost === 0 ? 'Gratis' : `Rp ${shippingCost.toLocaleString('id-ID')}`}
-            </Text>
+            {loadingShipping ? (
+              <ActivityIndicator size="small" color="#007AFF" />
+            ) : (
+              <Text style={[styles.summaryValue, theme === 'dark' && styles.textDark]}>
+                {shippingCost === 0 ? 'Gratis' : `Rp ${shippingCost?.toLocaleString('id-ID')}`}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -174,12 +218,16 @@ const CheckoutScreen: React.FC = () => {
         <View style={styles.footerActions}>
           <View>
             <Text style={[styles.totalLabel, theme === 'dark' && styles.textSecondaryDark]}>Total Bayar</Text>
-            <Text style={styles.totalAmount}>Rp {finalAmount.toLocaleString('id-ID')}</Text>
+            {loadingShipping ? (
+              <ActivityIndicator size="small" color="#007AFF" />
+            ) : (
+              <Text style={styles.totalAmount}>Rp {finalAmount.toLocaleString('id-ID')}</Text>
+            )}
           </View>
           <TouchableOpacity
-            style={[styles.placeOrderButton, !selectedPayment && styles.disabledButton]}
+            style={[styles.placeOrderButton, (!selectedPayment || loadingShipping) && styles.disabledButton]}
             onPress={handlePlaceOrder}
-            disabled={!selectedPayment}
+            disabled={!selectedPayment || loadingShipping}
           >
             <Text style={styles.placeOrderText}>
               {selectedPayment && (selectedPayment === 'cc' || selectedPayment === 'ewallet_gopay' || selectedPayment === 'ewallet_ovo') 
@@ -204,7 +252,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 200, // Space for the fixed footer
+    paddingBottom: 200,
   },
   title: {
     fontSize: 24,
@@ -239,6 +287,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#718096',
     lineHeight: 20,
+  },
+  // ✅ STYLE BARU UNTUK SHIPPING INFO
+  shippingInfo: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#EDF2F7',
+    borderRadius: 8,
+  },
+  shippingLabel: {
+    fontSize: 12,
+    marginBottom: 8,
+    color: '#718096',
+  },
+  shippingCost: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2D3748',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginLeft: 8,
+    fontSize: 12,
+    color: '#718096',
   },
   cartItem: {
     flexDirection: 'row',
@@ -297,7 +371,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#007AFF',
   },
-  // ✅ STYLE BARU UNTUK INFO BOX
   infoBox: {
     backgroundColor: '#EDF2F7',
     padding: 16,
@@ -327,7 +400,7 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: 'white',
     padding: 16,
-    paddingBottom: 32, // Safe area for home indicator
+    paddingBottom: 32,
     borderTopWidth: 1,
     borderTopColor: '#E2E8F0',
   },

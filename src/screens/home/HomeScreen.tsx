@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,17 +6,18 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useTheme } from '../../contexts/ThemeContext';
+import { startStoreProximityAlert, stopStoreProximityAlert } from '../../services/GeofencingService'; // ✅ IMPORT BARU
 
 type RootStackParamList = {
   HomeTabs: undefined;
   ProductDetail: { productId: string };
 };
 
-// ✅ TAMBAH type untuk kategori
 type CategoryType = 
   | 'Elektronik' 
   | 'Pakaian' 
@@ -28,6 +29,27 @@ type CategoryType =
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { theme } = useTheme();
+  const [isNearStore, setIsNearStore] = useState(false); // ✅ STATE BARU
+
+  useEffect(() => {
+    // ✅ AKTIFKAN GEOFENCING SAAT KOMPONEN MOUNT
+    const initGeofencing = async () => {
+      try {
+        await startStoreProximityAlert();
+        console.log('🏪 Geofencing activated for store proximity');
+      } catch (error) {
+        console.error('Error activating geofencing:', error);
+      }
+    };
+
+    initGeofencing();
+
+    // ✅ CLEANUP: MATIKAN GEOFENCING SAAT KOMPONEN UNMOUNT
+    return () => {
+      stopStoreProximityAlert();
+      console.log('🛑 Geofencing deactivated');
+    };
+  }, []);
 
   const featuredProducts = [
     {
@@ -73,20 +95,39 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('ProductDetail', { productId });
   };
 
-  // ✅ FIX: Simple category press handler
   const handleCategoryPress = (categoryName: CategoryType) => {
     const tabMap: Record<CategoryType, string> = {
-    'Elektronik': 'Elektronik',
-    'Pakaian': 'Pakaian', 
-    'Makanan': 'Makanan',
-    'Otomotif': 'Otomotif',
-    'Hiburan': 'Hiburan',
-    'Bayi': 'Bayi'
+      'Elektronik': 'Elektronik',
+      'Pakaian': 'Pakaian', 
+      'Makanan': 'Makanan',
+      'Otomotif': 'Otomotif',
+      'Hiburan': 'Hiburan',
+      'Bayi': 'Bayi'
     };
     const targetTab = tabMap[categoryName];
     console.log('Navigating to tab:', targetTab);
-    
-};
+  };
+
+  // ✅ FUNGSI UNTUK TEST GEOFENCING MANUAL
+  const testGeofencing = () => {
+    Alert.alert(
+      'Test Geofencing',
+      'Fitur geofencing sudah aktif! Aplikasi akan memberi notifikasi otomatis ketika Anda mendekati toko utama dalam radius 100 meter.',
+      [
+        { 
+          text: 'OK', 
+          onPress: () => console.log('User acknowledged geofencing test') 
+        },
+        {
+          text: 'Lihat Lokasi Toko',
+          onPress: () => {
+            // Navigate to store location map
+            console.log('Navigate to store location');
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <ScrollView style={[styles.container, theme === 'dark' && styles.containerDark]}>
@@ -98,6 +139,21 @@ const HomeScreen: React.FC = () => {
         <Text style={[styles.subtitle, theme === 'dark' && styles.textSecondaryDark]}>
           Temukan produk terbaik untuk Anda
         </Text>
+
+        {/* ✅ BANNER GEOFENCING */}
+        <TouchableOpacity 
+          style={[styles.geofencingBanner, theme === 'dark' && styles.geofencingBannerDark]}
+          onPress={testGeofencing}
+        >
+          <Text style={styles.geofencingIcon}>📍</Text>
+          <View style={styles.geofencingTextContainer}>
+            <Text style={styles.geofencingTitle}>Promo Lokasi Aktif</Text>
+            <Text style={styles.geofencingSubtitle}>
+              Dapatkan diskon 20% saat dekat toko utama
+            </Text>
+          </View>
+          <Text style={styles.geofencingArrow}>›</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Categories Section */}
@@ -182,6 +238,22 @@ const HomeScreen: React.FC = () => {
           </View>
         </TouchableOpacity>
       </View>
+
+      {/* ✅ INFORMASI GEOFENCING */}
+      <View style={[styles.infoSection, theme === 'dark' && styles.infoSectionDark]}>
+        <Text style={[styles.infoTitle, theme === 'dark' && styles.textDark]}>
+          🎯 Fitur Lokasi Cerdas
+        </Text>
+        <Text style={[styles.infoText, theme === 'dark' && styles.textSecondaryDark]}>
+          • Notifikasi promo otomatis saat dekat toko
+        </Text>
+        <Text style={[styles.infoText, theme === 'dark' && styles.textSecondaryDark]}>
+          • Perhitungan ongkir berdasarkan lokasi Anda
+        </Text>
+        <Text style={[styles.infoText, theme === 'dark' && styles.textSecondaryDark]}>
+          • Deteksi toko terdekat secara real-time
+        </Text>
+      </View>
     </ScrollView>
   );
 };
@@ -207,6 +279,42 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#718096',
+    marginBottom: 16,
+  },
+  // ✅ STYLE BARU UNTUK GEOFENCING BANNER
+  geofencingBanner: {
+    backgroundColor: '#10B981',
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  geofencingBannerDark: {
+    backgroundColor: '#065F46',
+  },
+  geofencingIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  geofencingTextContainer: {
+    flex: 1,
+  },
+  geofencingTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 4,
+  },
+  geofencingSubtitle: {
+    fontSize: 12,
+    color: 'white',
+    opacity: 0.9,
+  },
+  geofencingArrow: {
+    fontSize: 20,
+    color: 'white',
+    fontWeight: 'bold',
   },
   section: {
     marginBottom: 24,
@@ -355,6 +463,29 @@ const styles = StyleSheet.create({
   },
   promoEmoji: {
     fontSize: 24,
+  },
+  // ✅ STYLE BARU UNTUK INFO SECTION
+  infoSection: {
+    backgroundColor: '#EDF2F7',
+    marginHorizontal: 20,
+    marginBottom: 24,
+    padding: 16,
+    borderRadius: 12,
+  },
+  infoSectionDark: {
+    backgroundColor: '#2D3748',
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: '#2D3748',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#718096',
+    marginBottom: 6,
+    lineHeight: 20,
   },
   textDark: {
     color: '#F7FAFC',
