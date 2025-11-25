@@ -2,12 +2,19 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import QuickProfilePreview from '../../components/QuickProfilePreview'; // IMPORT BARU
+import QuickProfilePreview from '../../components/QuickProfilePreview';
+import * as Keychain from 'react-native-keychain';
 
 const ProfileScreen: React.FC = () => {
   const { theme } = useTheme();
-  const { user, isAuthenticated } = useAuth();
-  const [showImagePicker, setShowImagePicker] = useState(false); // STATE BARU
+  const { user, isAuthenticated, logout } = useAuth();
+  const [showImagePicker, setShowImagePicker] = useState(false);
+
+  const forceLogout = async () => {
+    await Keychain.resetGenericPassword();
+    logout();
+    Alert.alert('Success', 'Logged out and credentials cleared');
+  };
 
   if (!isAuthenticated) {
     return (
@@ -50,6 +57,13 @@ const ProfileScreen: React.FC = () => {
         <Text style={[styles.infoText, theme === 'dark' && styles.textDark]}>
           Email: {user?.email}
         </Text>
+
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={forceLogout}>
+          <Text style={styles.logoutButtonText}>
+           Logout
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -105,6 +119,19 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   changePhotoText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  // ✅ TAMBAHKAN STYLE UNTUK LOGOUT BUTTON
+  logoutButton: {
+    backgroundColor: '#E53E3E',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  logoutButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
